@@ -13,4 +13,8 @@ GL/glut.h
 -
 math.h
 -
+string.h
+-
+stdio.h
+-
 

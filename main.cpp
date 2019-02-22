@@ -6,8 +6,22 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <string.h>
+#include <stdio.h>
 
 GLdouble dist = 8, beta = M_PI_4, alpha = M_PI_4;
+
+int ac;
+char **av = NULL;
+
+void usage(char *shape){
+	if(strcmp(shape, "cone") == 0)
+		printf("Usage: ./class3 cone radius height slices\n");
+	if(strcmp(shape, "plane") == 0)
+		printf("Usage: ./class3 plane x z\n");
+	if(strcmp(shape, "box") == 0)
+		printf("Usage: ./class3 box x y z\n");
+}
 
 void changeSize(int w, int h) {
 	// Prevent a divide by zero, when window is too short
@@ -34,7 +48,7 @@ void changeSize(int w, int h) {
 }
 
 
-void drawCylinder(float radius, float height, int slices) {
+void drawCone(float radius, float height, int slices) {
 	// put code to draw cylinder in here
 	GLdouble alphaDelta = 2 * M_PI / slices;
 
@@ -81,8 +95,70 @@ void drawPlane(int x, int z) {
 
 }
 
+void drawBox(int x, int y, int z, int nr = 2){
+	glBegin(GL_TRIANGLES);
+		glColor3f(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX,rand()/(float)RAND_MAX);
+		
+		//Face cima
+		glVertex3f(x/2, y/2, z/2);
+		glVertex3f(x/2, y/2, -z/2);
+		glVertex3f(-x/2, y/2, -z/2);
 
-void renderScene(void) {
+		glVertex3f(-x/2, y/2, -z/2);
+		glVertex3f(-x/2, y/2, z/2);
+		glVertex3f(x/2, y/2, z/2);
+
+		//Face baixo
+		glVertex3f(x/2, -y/2, -z/2);
+		glVertex3f(x/2, -y/2, z/2);
+		glVertex3f(-x/2, -y/2, z/2);
+
+		glVertex3f(-x/2, -y/2, z/2);
+		glVertex3f(-x/2, -y/2, -z/2);
+		glVertex3f(x/2, -y/2, -z/2);
+
+		//Face lateral 1
+		glVertex3f(x/2, -y/2, z/2);
+		glVertex3f(x/2, y/2, z/2);
+		glVertex3f(-x/2, y/2, z/2);
+
+		glVertex3f(-x/2, y/2, z/2);
+		glVertex3f(-x/2, -y/2, z/2);
+		glVertex3f(x/2, -y/2, z/2);
+
+		//Face lateral 2
+		glVertex3f(-x/2, -y/2, z/2);
+		glVertex3f(-x/2, y/2, z/2);
+		glVertex3f(-x/2, y/2, -z/2);
+
+		glVertex3f(-x/2, y/2, -z/2);
+		glVertex3f(-x/2, -y/2, -z/2);
+		glVertex3f(-x/2, -y/2, z/2);
+		
+		//Face lateral 3
+		glVertex3f(x/2, -y/2, -z/2);
+		glVertex3f(x/2, y/2, -z/2);
+		glVertex3f(x/2, y/2, z/2);
+
+		glVertex3f(x/2, y/2, z/2);
+		glVertex3f(x/2, -y/2, z/2);
+		glVertex3f(x/2, -y/2, -z/2);
+
+		//Face lateral 4
+		glVertex3f(-x/2, -y/2, -z/2);
+		glVertex3f(-x/2, y/2, -z/2);
+		glVertex3f(x/2, y/2, -z/2);
+
+		glVertex3f(x/2, y/2, -z/2);
+		glVertex3f(x/2, -y/2, -z/2);
+		glVertex3f(-x/2, -y/2, -z/2);
+
+		glEnd();
+}
+
+
+void renderScene() {
+	int badUsage = 0;
 	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -92,8 +168,27 @@ void renderScene(void) {
 		0.0, 0.0, 0.0,
 		0.0f, 1.0f, 0.0f);
 
-	drawCylinder(1, 2, 100);
-	drawPlane(10,10);
+	if(strcmp(av[1], "cone") == 0){
+		if(ac == 5)
+			drawCone(atoi(av[2]), atoi(av[3]), atoi(av[4]));
+		else
+			badUsage = 1;
+	}
+	if(strcmp(av[1], "plane") == 0){
+		if(ac == 4)
+			drawPlane(atoi(av[2]),atoi(av[3]));
+		else
+			badUsage = 1;
+	}
+	if(strcmp(av[1], "box") == 0){
+		if(ac == 5)
+			drawBox(atoi(av[2]),atoi(av[3]),atoi(av[4]));
+		else
+			badUsage = 1;
+	}
+
+	if(badUsage)
+		usage(av[1]);
 
 	// End of frame
 	glutSwapBuffers();
@@ -148,10 +243,11 @@ void processSpecialKeys(int key, int xx, int yy) {
 	glutPostRedisplay();
 }
 
-
 int main(int argc, char **argv) {
 	// init GLUT and the window
 	glutInit(&argc, argv);
+	ac = argc;
+	av = argv;
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(100, 100);
 	glutInitWindowSize(800, 800);
