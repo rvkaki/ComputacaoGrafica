@@ -41,15 +41,15 @@ void drawCylinder(float radius, float height, int slices) {
 	glBegin(GL_TRIANGLES);
 
 
-	for (GLdouble i = 0; i < slices + 0.5; i++) {
-		// Festa dos triângulos com os bicos para cima
+	for (GLdouble i = 0; i < slices; i++) {
+		// Festa dos triï¿½ngulos com os bicos para cima
 		glColor3f(1, 1, 0);
 		glVertex3f(radius*sin(i*alphaDelta), 0, radius*cos(i*alphaDelta));
 		glVertex3f(radius*sin((i + 1)*alphaDelta), 0, radius*cos((i + 1)*alphaDelta));
 		glVertex3f(0, height, 0);
 
-		// Circunferência de baixo
-		glColor3f(rand / (float)RAND_MAX, rand / (float)RAND_MAX,rand/(float)RAND_MAX);
+		// Circunferï¿½ncia de baixo
+		glColor3f(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX,rand()/(float)RAND_MAX);
 		glVertex3f(0, 0, 0);
 		glVertex3f(radius*sin(i*alphaDelta), 0, radius*cos(i*alphaDelta));
 		glVertex3f(radius*sin((i - 1)*alphaDelta), 0, radius*cos((i - 1)*alphaDelta));
@@ -57,6 +57,28 @@ void drawCylinder(float radius, float height, int slices) {
 	}
 
 	glEnd();
+}
+
+void drawPlane(int x, int z) {
+    glBegin(GL_TRIANGLES);
+        glColor3f(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX,rand()/(float)RAND_MAX);
+        glVertex3f(0, 0, z / 2);
+        glVertex3f(x / 2, 0, 0);
+        glVertex3f(0, 0, -z / 2);
+
+        glVertex3f(0,0,-z/2);
+        glVertex3f(-x/2,0,0);
+        glVertex3f(0,0,z/2);
+
+		glVertex3f(0, 0, -z / 2);
+        glVertex3f(x / 2, 0, 0);
+        glVertex3f(0, 0, z / 2);
+        
+        glVertex3f(0,0,z/2);
+        glVertex3f(-x/2,0,0);
+        glVertex3f(0,0,-z/2);
+        glEnd();
+
 }
 
 
@@ -70,7 +92,8 @@ void renderScene(void) {
 		0.0, 0.0, 0.0,
 		0.0f, 1.0f, 0.0f);
 
-	drawCylinder(1, 2, 10);
+	drawCylinder(1, 2, 100);
+	drawPlane(10,10);
 
 	// End of frame
 	glutSwapBuffers();
