@@ -12,7 +12,7 @@
 GLdouble dist = 8, beta = M_PI_4, alpha = M_PI_4;
 
 int ac;
-char **av = NULL;
+char **av = NULL;  
 
 void usage(char *shape){
 	if(strcmp(shape, "cone") == 0)
