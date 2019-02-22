@@ -6,8 +6,10 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include <string.h>
-#include <stdio.h>
+#include <iostream>
+#include <fstream>
+
+ofstream f;
 
 GLdouble dist = 8, beta = M_PI_4, alpha = M_PI_4;
 
@@ -15,12 +17,14 @@ int ac;
 char **av = NULL;  
 
 void usage(char *shape){
+	if(strcmp(shape, "sphere") == 0)
+		cout << "Usage: ./class3 sphere radius slices stacks\n";
 	if(strcmp(shape, "cone") == 0)
-		printf("Usage: ./class3 cone radius height slices\n");
+		cout << "Usage: ./class3 cone radius height slices stacks\n";
 	if(strcmp(shape, "plane") == 0)
-		printf("Usage: ./class3 plane x z\n");
+		cout << "Usage: ./class3 plane x z\n";
 	if(strcmp(shape, "box") == 0)
-		printf("Usage: ./class3 box x y z\n");
+		cout << "Usage: ./class3 box x y z\n";
 }
 
 void changeSize(int w, int h) {
@@ -244,6 +248,46 @@ void processSpecialKeys(int key, int xx, int yy) {
 }
 
 int main(int argc, char **argv) {
+
+	int x,y,z;
+
+	if (argc < 5) {
+		printf("É necessário indicar o ficheiro de destino e a forma geométrica a ser desenhada\n");
+		exit(EXIT_FAILURE);
+	}
+
+	f.open(argv[argc-1]);
+
+	switch (string(argv[1]))
+	{
+		case 'plane':
+			if(argc != 5) {
+				printf("Número incorreto de argumentos\n");
+				usage("plane");
+				exit(EXIT_FAILURE);
+			}
+
+			x = atoi(argv[2]);
+			z = atoi(argv[3]);
+			drawPlane(x,z); 
+			break;
+
+		case 'box':
+			if(argc != 7 || argc != 6) {
+				printf("Número incorreto de argumentos\n");
+				usage("box");
+				exit(EXIT_FAILURE);
+			}
+
+			x = atoi(argv[2]);
+			y = atoi(argv[3]);
+			z = atoi(argv[4]);
+			drawBox(x,y,z);
+	
+		default:
+			break;
+	}
+
 	// init GLUT and the window
 	glutInit(&argc, argv);
 	ac = argc;
@@ -254,6 +298,7 @@ int main(int argc, char **argv) {
 	glutCreateWindow("CG@DI-UM");
 
 	// Required callback registry 
+	glutIdleFunc(renderScene);
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(changeSize);
 
