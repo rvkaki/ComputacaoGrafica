@@ -16,13 +16,13 @@ void drawVertex(float x, float y, float z) {
 
 void usage(char *shape){
 	if(strcmp(shape, "sphere") == 0)
-		cout << "Usage: ./class3 sphere radius slices stacks\n";
+		cout << "Usage: ./tpf1 sphere radius slices stacks\n";
 	if(strcmp(shape, "cone") == 0)
-		cout << "Usage: ./class3 cone radius height slices stacks\n";
+		cout << "Usage: ./tpf1 cone radius height slices stacks\n";
 	if(strcmp(shape, "plane") == 0)
-		cout << "Usage: ./class3 plane x z\n";
+		cout << "Usage: ./tpf1 plane x z\n";
 	if(strcmp(shape, "box") == 0)
-		cout << "Usage: ./class3 box x y z\n";
+		cout << "Usage: ./tpf1 box x y z\n";
 }
 
 void drawPlane(int x, int z) {
