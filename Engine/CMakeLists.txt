@@ -1,21 +1,16 @@
 cmake_minimum_required(VERSION 3.5)
 
 # Project Name
-PROJECT(tpf1)
+PROJECT(engine)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp tinyxml2.o)
 
 find_package(OpenGL REQUIRED)
 include_directories(${OpenGL_INCLUDE_DIRS})
 link_directories(${OpenGL_LIBRARY_DIRS})
 add_definitions(${OpenGL_DEFINITIONS})
-
-find_package(tinyxml2 REQUIRED)
-include_directories(${tinyxml2_INCLUDE_DIRS})
-link_directories(${tinyxml2_LIBRARY_DIRS})
-add_definitions(${tinyxml2_DEFINITIONS})
 
 if(NOT OPENGL_FOUND)
     message(ERROR " OPENGL not found!")
@@ -30,7 +25,7 @@ if  (WIN32)
 	endif (NOT EXISTS "${GLUT_DIR}/GL/glut.h" OR NOT EXISTS "${GLUT_DIR}/glut32.lib")	
 	include_directories(${GLUT_DIR})
 	link_directories(${GLUT_DIR})
-	target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${GLUT_DIR}/glut32.lib ${tinyxml2_LIBRARY})
+	target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${GLUT_DIR}/glut32.lib)
 	if (EXISTS "${GLUT_DIR}/glut32.dll")
 		file(COPY ${GLUT_DIR}/glut32.dll DESTINATION ${CMAKE_BINARY_DIR})
 	endif(EXISTS "${GLUT_DIR}/glut32.dll")
@@ -43,7 +38,7 @@ else (WIN32) #Linux and Mac
 	include_directories(${GLUT_INCLUDE_DIR})
 	link_directories(${GLUT_LIBRARY_DIRS})
 	add_definitions(${GLUT_DEFINITIONS})
-	target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${tinyxml2_LIBRARIES} )
+	target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 	if(NOT GLUT_FOUND)
 	   message(ERROR ": GLUT not found!")
 	endif(NOT GLUT_FOUND)

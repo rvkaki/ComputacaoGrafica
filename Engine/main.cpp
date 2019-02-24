@@ -10,7 +10,7 @@
 #include "tinyxml2.h"
 using namespace tinyxml2;
 
-GLdouble dist = 8, beta = M_PI_4, alpha = M_PI_4;
+GLdouble dist = 10, beta = M_PI_4, alpha = M_PI_4;
 
 typedef std::tuple<float, float, float> vertice;
 std::vector<vertice> Vertices;

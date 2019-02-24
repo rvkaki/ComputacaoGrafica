@@ -16,16 +16,16 @@ void drawVertex(float x, float y, float z) {
 
 void usage(char *shape){
 	if(strcmp(shape, "sphere") == 0)
-		cout << "Usage: ./tpf1 sphere radius slices stacks\n";
+		printf("Usage: ./generate sphere radius slices stacks\n");
 	if(strcmp(shape, "cone") == 0)
-		cout << "Usage: ./tpf1 cone radius height slices stacks\n";
+		printf("Usage: ./generate cone radius height slices stacks\n");
 	if(strcmp(shape, "plane") == 0)
-		cout << "Usage: ./tpf1 plane x z\n";
+		printf("Usage: ./generate plane x z\n");
 	if(strcmp(shape, "box") == 0)
-		cout << "Usage: ./tpf1 box x y z\n";
+		printf("Usage: ./generate box x y z\n");
 }
 
-void drawPlane(int x, int z) {
+void drawPlane(float x, float z) {
     drawVertex(0, 0, z / 2);
     drawVertex(x / 2, 0, 0);
     drawVertex(0, 0, -z / 2);
@@ -119,16 +119,16 @@ void drawCone(float radius, float height, int slices, int stacks) {
 		for(float j = 0.5*(i%2); j < slices + 0.5*(i%2); j++)
 		{
 			// Triangulas virados para cima
-			drawVertex(radius * sin(i*sl), height, radius * cos(i*sl));
-			drawVertex(radius * sin((i+1)*sl), height, radius * cos((i+1)*sl));
-			drawVertex(nr * sin((i+0.5)*sl), nh, nr * cos((i+0.5)*sl));
+			drawVertex(radius * sin(j*sl), height, radius * cos(j*sl));
+			drawVertex(radius * sin((j+1)*sl), height, radius * cos((j+1)*sl));
+			drawVertex(nr * sin((j+0.5)*sl), nh, nr * cos((j+0.5)*sl));
 
-			i += 0.5;
+			j += 0.5;
 			// Triangulos virados para baixo
-			drawVertex(nr * sin((i+1)*sl), nh, nr * cos((i+1)*sl));
-			drawVertex(nr*sin((i+1)*sl), nh, nr*cos((i+1)*sl));
-			drawVertex(radius * sin((i+0.5)*sl), height, radius * cos((i+0.5)*sl));
-			i -= 0.5;
+			drawVertex(nr * sin((j+1)*sl), nh, nr * cos((j+1)*sl));
+			drawVertex(nr*sin((j+1)*sl), nh, nr*cos((j+1)*sl));
+			drawVertex(radius * sin((j+0.5)*sl), height, radius * cos((j+0.5)*sl));
+			j -= 0.5;
 		}
 		radius = nr;
 		nr -= r;
@@ -141,34 +141,34 @@ void drawSphere(int radius, int slices, int stacks) {
 	float nr, h, nh;
 	float r = radius;
 
-	for(int i = 0; i < ((float)stacks)/2; i++) {
+	for(int i = 0; i < (((float)stacks)/2); i++) {
 		r = nr;
 		nr = radius * cos(beta*(i+1));
 		h = radius * sin(beta*i);
 		nh = radius * sin(beta*(i+1));
 
-		for(int j = 0.5 * (i%2); j < slices + 0.5*(j%2); i++) {
+		for(float j = 0.5 * (i%2); j < slices + 0.5*(i%2); j++) {
 			//Triangulos voltados para cima - metade superior
-			drawVertex(r * sin(i*sl), h, r * cos(i*sl));
-			drawVertex(r * sin((i+1)*sl), h, r * cos((i+1)*sl));
-			drawVertex(nr * sin((i+0.5)*sl), nh, nr * cos((i+0.5)*sl));
+			drawVertex(r * sin(j*sl), h, r * cos(j*sl));
+			drawVertex(r * sin((j+1)*sl), h, r * cos((j+1)*sl));
+			drawVertex(nr * sin((j+0.5)*sl), nh, nr * cos((j+0.5)*sl));
 		
 			// Triangulos voltados para cima - metade inferior
-			drawVertex(r*sin(i*sl), -h, r*cos(i*sl));
-			drawVertex(nr*sin((i+0.5)*sl), -nh, nr*cos((i+0.5)*sl));
-			drawVertex(r*sin((i+1)*sl), -h, r*cos((i+1)*sl));
+			drawVertex(r*sin(j*sl), -h, r*cos(j*sl));
+			drawVertex(nr*sin((j+0.5)*sl), -nh, nr*cos((j+0.5)*sl));
+			drawVertex(r*sin((j+1)*sl), -h, r*cos((j+1)*sl));
 
-			i += 0.5;
+			j += 0.5;
 			// Triangulos voltados para baixo - metade superior
-			drawVertex(nr * sin((i+1)*sl), nh, nr * cos((i+1)*sl));
-			drawVertex(nr * sin(i*sl), nh, nr * cos(i*sl));
-			drawVertex(r * sin((i+0.5)*sl), h, r * cos((i+0.5)*sl));
+			drawVertex(nr * sin((j+1)*sl), nh, nr * cos((j+1)*sl));
+			drawVertex(nr * sin(j*sl), nh, nr * cos(j*sl));
+			drawVertex(r * sin((j+0.5)*sl), h, r * cos((j+0.5)*sl));
 
 			// Triangulos voltados para baixo - metade inferior
-			drawVertex(nr * sin((i+1)*sl), -nh, nr * cos((i+1)*sl));
-			drawVertex(r * sin((i+0.5)*sl), -h, r*cos((i+0.5)*sl));
-			drawVertex(nr * sin(i*sl), -nh, nr*cos(i*sl));
-			i -= 0.5;
+			drawVertex(nr * sin((j+1)*sl), -nh, nr * cos((j+1)*sl));
+			drawVertex(r * sin((j+0.5)*sl), -h, r*cos((j+0.5)*sl));
+			drawVertex(nr * sin(j*sl), -nh, nr*cos(j*sl));
+			j -= 0.5;
 		}
 	}
 }
