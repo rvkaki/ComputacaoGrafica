@@ -54,13 +54,13 @@ vertice extractVertice(std::string s) {
     // y
     p = s.find(del);
     token = s.substr(0, p);
-    x = atof(token.c_str());
+    y = atof(token.c_str());
     s.erase(0, p + del.length());
 
     // z
     p = s.find(del);
     token = s.substr(0, p);
-    x = atof(token.c_str());
+    z = atof(token.c_str());
 
     return vertice(x, y, z);
 }
@@ -77,7 +77,7 @@ void drawVertices() {
 
     for(vertice v : Vertices) {
         glColor3f(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX);
-        glVertex3f(std::get<0>(v), std::get<1>(v), std::get<0>(v));
+        glVertex3f(std::get<0>(v), std::get<1>(v), std::get<2>(v));
     }
 
     glEnd();

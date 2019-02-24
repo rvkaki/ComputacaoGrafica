@@ -107,7 +107,7 @@ void drawCone(float radius, float height, int slices, int stacks) {
 
 	for (int i = 0; i < slices; i++) {
 		drawVertex(0,0,0);
-		drawVertex(radius * sin(i+1) * sl, 0, radius * cos(i+1) * sl);
+		drawVertex(radius * sin((i+1) * sl), 0, radius * cos((i+1) * sl));
 		drawVertex(radius * sin(i*sl), 0, radius * cos(i*sl));
 	}
 
@@ -126,7 +126,7 @@ void drawCone(float radius, float height, int slices, int stacks) {
 			j += 0.5;
 			// Triangulos virados para baixo
 			drawVertex(nr * sin((j+1)*sl), nh, nr * cos((j+1)*sl));
-			drawVertex(nr*sin((j+1)*sl), nh, nr*cos((j+1)*sl));
+			drawVertex(nr*sin(j*sl), nh, nr*cos(j*sl));
 			drawVertex(radius * sin((j+0.5)*sl), height, radius * cos((j+0.5)*sl));
 			j -= 0.5;
 		}
@@ -135,14 +135,13 @@ void drawCone(float radius, float height, int slices, int stacks) {
 	}
 }
 
-void drawSphere(int radius, int slices, int stacks) {
+void drawSphere(int radius, int slices, int stacks) {	
 	double sl = 2 * M_PI / slices;
 	double beta = M_PI_2 / (stacks / 2);
 	float nr, h, nh;
 	float r = radius;
 
 	for(int i = 0; i < (((float)stacks)/2); i++) {
-		r = nr;
 		nr = radius * cos(beta*(i+1));
 		h = radius * sin(beta*i);
 		nh = radius * sin(beta*(i+1));
@@ -170,6 +169,7 @@ void drawSphere(int radius, int slices, int stacks) {
 			drawVertex(nr * sin(j*sl), -nh, nr*cos(j*sl));
 			j -= 0.5;
 		}
+		r = nr;
 	}
 }
 
@@ -195,7 +195,7 @@ int main(int argc, char **argv) {
 			drawPlane(x,z);
 		}
 	} else if(strcmp(argv[1], "box") == 0) {
-		if(argc != 7 || argc != 6) {
+		if(argc != 6) {
 			printf("Número incorreto de argumentos\n");
 			usage("box");
 			exit(EXIT_FAILURE);
