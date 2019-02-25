@@ -14,17 +14,6 @@ void drawVertex(float x, float y, float z) {
 	f << x << " " << y << " " << z << "\n";
 }
 
-void usage(char *shape){
-	if(strcmp(shape, "sphere") == 0)
-		printf("Usage: ./generate sphere radius slices stacks\n");
-	if(strcmp(shape, "cone") == 0)
-		printf("Usage: ./generate cone radius height slices stacks\n");
-	if(strcmp(shape, "plane") == 0)
-		printf("Usage: ./generate plane x z\n");
-	if(strcmp(shape, "box") == 0)
-		printf("Usage: ./generate box x y z\n");
-}
-
 void drawPlane(float x, float z) {
     drawVertex(0, 0, z / 2);
     drawVertex(x / 2, 0, 0);
@@ -43,60 +32,85 @@ void drawPlane(float x, float z) {
     drawVertex(0,0,-z/2);
 }
 
-void drawBox(int x, int y, int z, int nr = 2){
-	//Face cima
-	drawVertex(x/2, y/2, z/2);
-	drawVertex(x/2, y/2, -z/2);
-	drawVertex(-x/2, y/2, -z/2);
+void drawBox(float x, float y, float z, int div = 1){
+	float xOff = x /div;
+	float zOff = z /div;
+	float yOff = y /div;
+	float x1 = -x /2;
+	float y1 = -y /2;
+	float z1 = -z /2;
+	float x2 = x1;
+	float y2 = y1;
+	float z2 = z1;
+	for(float j = 0; j < div; j ++){
+		x1 = -x /2;
+		y1 = -y /2;
+		z1 = -z /2;
+		for(float i = 0; i < div; i ++){
+			//Face superior
+			drawVertex(x1, y/2, z2);
+			drawVertex(x1+xOff, y/2, z2+zOff);
+			drawVertex(x1+xOff, y/2, z2);
 
-	drawVertex(-x/2, y/2, -z/2);
-	drawVertex(-x/2, y/2, z/2);
-	drawVertex(x/2, y/2, z/2);
+			drawVertex(x1, y/2, z2);
+			drawVertex(x1, y/2, z2+zOff);
+			drawVertex(x1+xOff, y/2, z2+zOff);
 
-	//Face baixo
-	drawVertex(x/2, -y/2, -z/2);
-	drawVertex(x/2, -y/2, z/2);
-	drawVertex(-x/2, -y/2, z/2);
+			//Face inferior
+			drawVertex(x1, -y/2, z2);
+			drawVertex(x1+xOff, -y/2, z2);
+			drawVertex(x1+xOff, -y/2, z2+zOff);
 
-	drawVertex(-x/2, -y/2, z/2);
-	drawVertex(-x/2, -y/2, -z/2);
-	drawVertex(x/2, -y/2, -z/2);
+			drawVertex(x1, -y/2, z2);
+			drawVertex(x1+xOff, -y/2, z2+zOff);
+			drawVertex(x1, -y/2, z2+zOff);
 
-	//Face lateral 1
-	drawVertex(x/2, -y/2, z/2);
-	drawVertex(x/2, y/2, z/2);
-	drawVertex(-x/2, y/2, z/2);
+			//Face Lateral 1
+			drawVertex(x1, y2, z/2);
+			drawVertex(x1+xOff, y2+yOff, z/2);
+			drawVertex(x1, y2+yOff, z/2);
 
-	drawVertex(-x/2, y/2, z/2);
-	drawVertex(-x/2, -y/2, z/2);
-	drawVertex(x/2, -y/2, z/2);
+			drawVertex(x1, y2, z/2);
+			drawVertex(x1+xOff, y2, z/2);
+			drawVertex(x1+xOff, y2+yOff, z/2);
 
-	//Face lateral 2
-	drawVertex(-x/2, -y/2, z/2);
-	drawVertex(-x/2, y/2, z/2);
-	drawVertex(-x/2, y/2, -z/2);
+			//Face Lateral 2
+			drawVertex(x1, y2, -z/2);
+			drawVertex(x1, y2+yOff, -z/2);
+			drawVertex(x1+xOff, y2+yOff, -z/2);
 
-	drawVertex(-x/2, y/2, -z/2);
-	drawVertex(-x/2, -y/2, -z/2);
-	drawVertex(-x/2, -y/2, z/2);
-	
-	//Face lateral 3
-	drawVertex(x/2, -y/2, -z/2);
-	drawVertex(x/2, y/2, -z/2);
-	drawVertex(x/2, y/2, z/2);
+			drawVertex(x1, y2, -z/2);
+			drawVertex(x1+xOff, y2+yOff, -z/2);
+			drawVertex(x1+xOff, y2, -z/2);
 
-	drawVertex(x/2, y/2, z/2);
-	drawVertex(x/2, -y/2, z/2);
-	drawVertex(x/2, -y/2, -z/2);
+			//Face Lateral 3
+			drawVertex(x/2, y2, z1);
+			drawVertex(x/2, y2+yOff, z1);
+			drawVertex(x/2, y2+yOff, z1+zOff);
 
-	//Face lateral 4
-	drawVertex(-x/2, -y/2, -z/2);
-	drawVertex(-x/2, y/2, -z/2);
-	drawVertex(x/2, y/2, -z/2);
+			drawVertex(x/2, y2, z1);
+			drawVertex(x/2, y2+yOff, z1+zOff);
+			drawVertex(x/2, y2, z1+zOff);
 
-	drawVertex(x/2, y/2, -z/2);
-	drawVertex(x/2, -y/2, -z/2);
-	drawVertex(-x/2, -y/2, -z/2);
+			//Face Lateral 4
+			drawVertex(-x/2, y2, z1);
+			drawVertex(-x/2, y2+yOff, z1+zOff);
+			drawVertex(-x/2, y2+yOff, z1);
+
+			drawVertex(-x/2, y2, z1);
+			drawVertex(-x/2, y2, z1+zOff);
+			drawVertex(-x/2, y2+yOff, z1+zOff);
+
+
+			x1 += xOff;
+			y1 += yOff;
+			z1 += zOff;
+		}
+		x2 += xOff;
+		y2 += yOff;
+		z2 += zOff;
+		
+	}
 }
 
 void drawCone(float radius, float height, int slices, int stacks) {
@@ -186,8 +200,7 @@ int main(int argc, char **argv) {
 
 	if(strcmp(argv[1], "plane") == 0) {
 		if(argc != 5) {
-			printf("Número incorreto de argumentos\n");
-			usage("plane");
+			printf("Número incorreto de argumentos\nUsage: ./generate plane x z\n");
 			exit(EXIT_FAILURE);
 		} else {
 			x = atoi(argv[2]);
@@ -195,20 +208,24 @@ int main(int argc, char **argv) {
 			drawPlane(x,z);
 		}
 	} else if(strcmp(argv[1], "box") == 0) {
-		if(argc != 6) {
-			printf("Número incorreto de argumentos\n");
-			usage("box");
-			exit(EXIT_FAILURE);
-		} else {
+		if(argc == 6) {
 			x = atoi(argv[2]);
 			y = atoi(argv[3]);
 			z = atoi(argv[4]);
 			drawBox(x,y,z);
+		} else if(argc ==7) {
+			x = atoi(argv[2]);
+			y = atoi(argv[3]);
+			z = atoi(argv[4]);
+			int div = atoi(argv[5]);
+			drawBox(x,y,z, div);
+		} else {
+			printf("Número incorreto de argumentos\nUsage: ./generate box x y z div\n");
+			exit(EXIT_FAILURE);
 		}
 	} else if(strcmp(argv[1], "cone") == 0) { 
 		if(argc != 7) {
-			printf("Número incorreto de argumentos\n");
-			usage("cone");
+			printf("Número incorreto de argumentos\nUsage: ./generate cone radius height slices stacks\n");
 			exit(EXIT_FAILURE);
 		} else {
 			radius = atoi(argv[2]);
@@ -219,8 +236,7 @@ int main(int argc, char **argv) {
 		}
 	} else if(strcmp(argv[1], "sphere") == 0) {
 		if(argc != 6) {
-			printf("Número incorreto de argumentos\n");
-			usage("sphere");
+			printf("Número incorreto de argumentos\nUsage: ./generate sphere radius slices stacks\n");
 			exit(EXIT_FAILURE);
 		} else {
 			radius = atoi(argv[2]);
