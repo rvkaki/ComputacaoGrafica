@@ -67,13 +67,6 @@
             <models>
                 <model file="../../sphere.3d" />
             </models>
-            <group>
-                <color R="0.7" G="0.4" B="0.2" />
-                <rotate A="45" X="0" Y="0" Z="1" />
-                <models>
-                    <model file="../../plane.3d" />
-                </models>
-            </group>
         </group>
 
         <group>
