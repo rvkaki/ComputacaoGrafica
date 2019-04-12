@@ -19,7 +19,7 @@ typedef std::tuple<char, float, float, float, float> transformation;
 typedef std::vector<transformation> Transformations;
 
 typedef struct curva {
-	bool valid;
+	int valid;
 	float time;
 	Vertices pontos;
 } Curva;
@@ -33,6 +33,24 @@ typedef struct group {
 typedef std::vector<Group> Groups;
 
 Groups allGroups;
+
+float x[3], y[3] = {0,1,0}, z[3];
+
+void buildRotMatrix(float *x, float *y, float *z, float *m) {
+
+	m[0] = x[0]; m[1] = x[1]; m[2] = x[2]; m[3] = 0;
+	m[4] = y[0]; m[5] = y[1]; m[6] = y[2]; m[7] = 0;
+	m[8] = z[0]; m[9] = z[1]; m[10] = z[2]; m[11] = 0;
+	m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+}
+
+
+void cross(float *a, float *b, float *res) {
+
+	res[0] = a[1]*b[2] - a[2]*b[1];
+	res[1] = a[2]*b[0] - a[0]*b[2];
+	res[2] = a[0]*b[1] - a[1]*b[0];
+}
 
 void multMatrixVector(float *m, float *v, float *res) {
 
@@ -105,9 +123,9 @@ void renderCatmullRomCurve(Curva curva) {
 	float pos[3] = {0,0,0};
 	float deriv[3] = {0,0,0};
 	glBegin(GL_LINE_LOOP);
-	for(float t = 0; t < curva.time; t += 0.001){
+	for(float t = 0; t < curva.time; t += 0.01){
 		getGlobalCatmullRomPoint(t, pos, deriv, curva.pontos);
-		for(int i= 0; i < 3; i++)
+		for(int i = 0; i < 3; i++)
 			glVertex3f(pos[0], pos[1], pos[2]);
 	}
 	glEnd();
@@ -181,19 +199,18 @@ void addGroup(XMLElement *group, Group *parent) {
 			Curva c;
 			float time;
 			if((time = elem->FloatAttribute("time"))) {
-				c.valid = true;
-				c.time = time;
+				c.valid = 1;
+				curG.c.time = time;
 				XMLElement *t = group -> FirstChildElement("translate");
 				for(XMLElement *point = t -> FirstChildElement(); point != nullptr; point = point -> NextSiblingElement()) {
 					vertice p (std::make_tuple(point->FloatAttribute("X"), point->FloatAttribute("Y"), point->FloatAttribute("Z")));
-					c.pontos.push_back(p);
+					curG.c.pontos.push_back(p);
 				}
 			} else {
-				c.valid = false;
+				c.valid = 0;
 				transformation t (std::make_tuple('T', elem->FloatAttribute("X"), elem->FloatAttribute("Y"), elem->FloatAttribute("Z"), 0));
 				curG.trans.push_back(t);
 			}
-			curG.c = c;
 		}
 
 		else if(name == "rotate") {
@@ -234,6 +251,10 @@ void addGroup(XMLElement *group, Group *parent) {
 
 
 void drawGroup(Group g) {
+
+	static float t = 0;
+	float m[4][4];
+	
 	glPushMatrix();
 
 	float R, G, B;
@@ -268,9 +289,21 @@ void drawGroup(Group g) {
 		}
 	}
 
-	if(g.c.valid){
+
+	if(g.c.valid == 1){
 		renderCatmullRomCurve(g.c);
+	
+		float pos[3] = {0, 0, 0};
+		float deriv[3] = {0, 0, 0};
+		getGlobalCatmullRomPoint(t, pos, deriv, g.c.pontos);
+		glTranslatef(pos[0], pos[1], pos[2]);
+
+		// rotate
+		cross(deriv,y,z);
+		buildRotMatrix(deriv,y,z,(float *)m);
+		glMultMatrixf((float *)m);
 	}
+
 
 	// Vertices
 	glBegin(GL_TRIANGLES);
@@ -278,18 +311,20 @@ void drawGroup(Group g) {
 		if (!color) {
         	glColor3f(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX);
 		} else {
-			float var = (rand() / (float) RAND_MAX) / 5;
-			glColor3f(R + var, G + var, B + var);
+			// float var = (rand() / (float) RAND_MAX) / 5;
+			glColor3f(R, G, B);
 		}
         glVertex3f(std::get<0>(v), std::get<1>(v), std::get<2>(v));
     }
     glEnd();
 
+	
 	for(Group sg: g.subGroups) {
 		drawGroup(sg);
 	}
 
 	glPopMatrix();
+
 }
 
 void drawVertices() {
@@ -299,7 +334,6 @@ void drawVertices() {
 }
 
 void renderScene() {
-	int badUsage = 0;
 	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -320,8 +354,8 @@ void renderScene() {
 
 void processKeys(unsigned char c, int xx, int yy) {
 	// put code to process regular keys in here
-	float deltaToZoom = 0.3;
-	float deltaToMove = 0.1;
+	float deltaToZoom = 0.5;
+	float deltaToMove = 0.3;
 	switch (c) {
 		case 'w':
 			xd -= deltaToMove;
@@ -374,7 +408,7 @@ void processKeys(unsigned char c, int xx, int yy) {
 
 void processSpecialKeys(int key, int xx, int yy) {
 	// put code to process special keys in here
-	float deltaToMove = 0.1;
+	float deltaToMove = 0.3;
 	switch (key) {
 	case GLUT_KEY_UP:
 		beta += deltaToMove;
@@ -438,7 +472,7 @@ int main(int argc, char **argv) {
 
 	// Required callback registry 
 	glutDisplayFunc(renderScene);
-    // glutIdleFunc(renderScene);
+    glutIdleFunc(renderScene);
 	glutReshapeFunc(changeSize);
 
 	// Callback registration for keyboard processing
