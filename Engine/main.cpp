@@ -18,6 +18,12 @@ typedef std::vector<vertice> Vertices;
 typedef std::tuple<char, float, float, float, float> transformation;
 typedef std::vector<transformation> Transformations;
 
+typedef struct curva {
+	bool valid;
+	float time;
+	Vertices pontos;
+} Curva;
+
 typedef struct group {
 	Transformations trans;
 	Curva c;
@@ -28,10 +34,84 @@ typedef std::vector<Group> Groups;
 
 Groups allGroups;
 
-typedef struct curva {
-	float time;
-	Vertices pontos;
-} Curva;
+void multMatrixVector(float *m, float *v, float *res) {
+
+	for (int j = 0; j < 4; ++j) {
+		res[j] = 0;
+		for (int k = 0; k < 4; ++k) {
+			res[j] += v[k] * m[j * 4 + k];
+		}
+	}
+
+}
+
+void getCatmullRomPoint(float t, vertice v0, vertice v1, vertice v2, vertice v3, float *pos, float *deriv) {
+	
+	// T matrix
+	float T[4] = {powf(t,3), powf(t,2), t, 1};
+	float T1[4] = {3*powf(t,2), 2*t, 1, 0};
+
+
+	// catmull-rom matrix
+	float m[4][4] = {	{-0.5f,  1.5f, -1.5f,  0.5f},
+						{ 1.0f, -2.5f,  2.0f, -0.5f},
+						{-0.5f,  0.0f,  0.5f,  0.0f},
+						{ 0.0f,  1.0f,  0.0f,  0.0f}};
+			
+
+	// Compute A = M * P   
+	// i = 0
+	float p1[4] = {std::get<0>(v0), std::get<0>(v1), std::get<0>(v2), std::get<0>(v3)};
+	float a1[4];
+	multMatrixVector((float*)m, p1, a1);
+	pos[0] = T[0]*a1[0] + T[1]*a1[1] + T[2]*a1[2] + T[3]*a1[3];
+	deriv[0] = T1[0]*a1[0] + T1[1]*a1[1] + T1[2]*a1[2] + T1[3]*a1[3];
+
+	// i = 1
+	float p2[4] = {std::get<1>(v0), std::get<1>(v1), std::get<1>(v2), std::get<1>(v3)};
+	float a2[4];
+	multMatrixVector((float*)m, p2, a2);
+	pos[1] = T[0]*a2[0] + T[1]*a2[1] + T[2]*a2[2] + T[3]*a2[3];
+	deriv[1] = T1[0]*a2[0] + T1[1]*a2[1] + T1[2]*a2[2] + T1[3]*a2[3];
+
+	// i = 2
+	float p3[4] = {std::get<2>(v0), std::get<2>(v1), std::get<2>(v2), std::get<2>(v3)};
+	float a3[4];
+	multMatrixVector((float*)m, p3, a3);
+	pos[2] = T[0]*a3[0] + T[1]*a3[1] + T[2]*a3[2] + T[3]*a3[3];
+	deriv[2] = T1[0]*a3[0] + T1[1]*a3[1] + T1[2]*a3[2] + T1[3]*a3[3];
+}
+
+
+// given  global t, returns the point in the curve
+void getGlobalCatmullRomPoint(float gt, float *pos, float *deriv, Vertices pontos) {
+	int POINT_COUNT = pontos.size();
+	float t = gt * POINT_COUNT; // this is the real global t
+	int index = floor(t);  // which segment
+	t = t - index; // where within  the segment
+
+	// indices store the points
+	int indices[4]; 
+	indices[0] = (index + POINT_COUNT-1)%POINT_COUNT;	
+	indices[1] = (indices[0]+1)%POINT_COUNT;
+	indices[2] = (indices[1]+1)%POINT_COUNT; 
+	indices[3] = (indices[2]+1)%POINT_COUNT;
+
+	getCatmullRomPoint(t, pontos[indices[0]], pontos[indices[1]], pontos[indices[2]], pontos[indices[3]], pos, deriv);
+}
+
+void renderCatmullRomCurve(Curva curva) {
+	// desenhar a curva usando segmentos de reta - GL_LINE_LOOP
+	float pos[3] = {0,0,0};
+	float deriv[3] = {0,0,0};
+	glBegin(GL_LINE_LOOP);
+	for(float t = 0; t < curva.time; t += 0.001){
+		getGlobalCatmullRomPoint(t, pos, deriv, curva.pontos);
+		for(int i= 0; i < 3; i++)
+			glVertex3f(pos[0], pos[1], pos[2]);
+	}
+	glEnd();
+}
 
 
 void changeSize(int w, int h) {
@@ -98,20 +178,22 @@ void addGroup(XMLElement *group, Group *parent) {
 		std::string name = elem->Value();
 
 		if(name == "translate") {
+			Curva c;
 			float time;
 			if((time = elem->FloatAttribute("time"))) {
-				Curva c;
+				c.valid = true;
 				c.time = time;
 				XMLElement *t = group -> FirstChildElement("translate");
 				for(XMLElement *point = t -> FirstChildElement(); point != nullptr; point = point -> NextSiblingElement()) {
 					vertice p (std::make_tuple(point->FloatAttribute("X"), point->FloatAttribute("Y"), point->FloatAttribute("Z")));
 					c.pontos.push_back(p);
 				}
-				curG.c = c;
 			} else {
+				c.valid = false;
 				transformation t (std::make_tuple('T', elem->FloatAttribute("X"), elem->FloatAttribute("Y"), elem->FloatAttribute("Z"), 0));
 				curG.trans.push_back(t);
 			}
+			curG.c = c;
 		}
 
 		else if(name == "rotate") {
@@ -184,6 +266,10 @@ void drawGroup(Group g) {
 			default:
 				break;
 		}
+	}
+
+	if(g.c.valid){
+		renderCatmullRomCurve(g.c);
 	}
 
 	// Vertices
