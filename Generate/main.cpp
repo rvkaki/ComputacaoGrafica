@@ -2,6 +2,8 @@
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
+#include <string>
+#include <vector>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -187,9 +189,76 @@ void drawSphere(int radius, int slices, int stacks) {
 	}
 }
 
+void drawBezier(char *patch_file, int tessellation) {
+	std::ifstream patchFile;
+	patchFile.open(patch_file);
+
+	char *line = (char *) malloc(1000);
+	
+	patchFile.getline(line, 1000);
+	int numPatches = atoi(line);
+
+	std::vector<std::vector<int>> patches = std::vector<std::vector<int>>(numPatches);
+	std::string delimiter = ", ";
+
+	for(int i = 0; i < numPatches; i++) {
+		std::vector<int> patch;
+		
+		patchFile.getline(line, 1000);
+		std::string sep(line);
+		std::string num;
+		int pos = 0;
+		while((pos = sep.find(delimiter)) != std::string::npos) {
+			num = sep.substr(0, pos);
+			patch.push_back(stoi(num));
+			sep.erase(0, pos + delimiter.length());
+		}
+		patch.push_back(stoi(sep));
+		patches.push_back(patch);
+	}
+	
+	patchFile.getline(line, 1000);
+	int numCP = atoi(line);
+
+	struct CP {
+		float x;
+		float y;
+		float z;
+	};
+	std::vector<CP> cp = std::vector<CP>(numCP);
+
+	for(int i = 0; i < numCP; i++) {
+		CP c;
+		patchFile.getline(line, 1000);
+		std::string sep(line);
+		std::string coord;
+		int pos = 0;
+
+		pos = sep.find(delimiter);
+		coord = sep.substr(0, pos);
+		c.x = stof(coord);
+		sep.erase(0, pos + delimiter.length());
+
+		pos = sep.find(delimiter);
+		coord = sep.substr(0, pos);
+		c.y = stof(coord);
+		sep.erase(0, pos + delimiter.length());
+
+		pos = sep.find(delimiter);
+		coord = sep.substr(0, pos);
+		c.z = stof(coord);
+		sep.erase(0, pos + delimiter.length());
+
+		cp.push_back(c);
+	}
+
+}
+
 int main(int argc, char **argv) {
 	int x,y,z;
 	int radius, height, stacks, slices;
+	int tessellation;
+	char *pf;
 
 	if (argc < 5) {
 		printf("É necessário indicar o ficheiro de destino e a forma geométrica a ser desenhada\n");
@@ -244,6 +313,17 @@ int main(int argc, char **argv) {
 			stacks = atoi(argv[4]);
 			drawSphere(radius, slices, stacks);
 		}
+	} else if(strcmp(argv[1], "bezier") == 0){
+		if(argc != 5) {
+			printf("Número incorreto de argumentos\nUsage: ./generate bezier <patch file> tessellation\n");
+			exit(EXIT_FAILURE);
+		} else {
+			pf = argv[2];
+			tessellation = atoi(argv[3]);
+			drawBezier(pf, tessellation);
+		}
+		
+	
 	} else {
 		printf("Figura não suportada\n");
 		exit(EXIT_FAILURE);

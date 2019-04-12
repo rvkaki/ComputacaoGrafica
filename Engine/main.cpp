@@ -20,12 +20,18 @@ typedef std::vector<transformation> Transformations;
 
 typedef struct group {
 	Transformations trans;
+	Curva c;
 	Vertices v;
 	std::vector<struct group> subGroups;
 } Group;
 typedef std::vector<Group> Groups;
 
 Groups allGroups;
+
+typedef struct curva {
+	float time;
+	Vertices pontos;
+} Curva;
 
 
 void changeSize(int w, int h) {
@@ -92,8 +98,20 @@ void addGroup(XMLElement *group, Group *parent) {
 		std::string name = elem->Value();
 
 		if(name == "translate") {
-			transformation t (std::make_tuple('T', elem->FloatAttribute("X"), elem->FloatAttribute("Y"), elem->FloatAttribute("Z"), 0));
-			curG.trans.push_back(t);
+			float time;
+			if((time = elem->FloatAttribute("time"))) {
+				Curva c;
+				c.time = time;
+				XMLElement *t = group -> FirstChildElement("translate");
+				for(XMLElement *point = t -> FirstChildElement(); point != nullptr; point = point -> NextSiblingElement()) {
+					vertice p (std::make_tuple(point->FloatAttribute("X"), point->FloatAttribute("Y"), point->FloatAttribute("Z")));
+					c.pontos.push_back(p);
+				}
+				curG.c = c;
+			} else {
+				transformation t (std::make_tuple('T', elem->FloatAttribute("X"), elem->FloatAttribute("Y"), elem->FloatAttribute("Z"), 0));
+				curG.trans.push_back(t);
+			}
 		}
 
 		else if(name == "rotate") {
