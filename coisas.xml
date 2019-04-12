@@ -1,7 +1,7 @@
 <scene>
     <group>
-    <color R="1.0" G="0.55" B="0.2"/>
-    <scale X="10" Y="10" Z="10" />
+        <color R="1.0" G="0.55" B="0.2"/>
+        <scale X="10" Y="10" Z="10" />
         <models>
             <model file = "../../sphere.3d"/>
         </models>
@@ -27,21 +27,22 @@
         <group>
             <color R="0.0" G="0.5" B="1.0"/>
             <translate X="50" Y="0" Z="0" />
+            <rotate time="100" X="0" Y="1" Z="0"/>
+            <translate time="10">
+                <point X="-1" Y="-1" Z="0" />
+                <point X="-1" Y="1" Z="0" />
+                <point X="1" Y="1" Z="0" />
+                <point X="0" Y="0" Z="0" />
+                <point X="1" Y="-1" Z="0" />
+            </translate>
             <models>
-                <model file="../../sphere.3d" />
+                <model file="../../plane.3d" />
             </models>
 
             <group>
                 <color R="0.7" G="0.7" B="0.7"/>
                 <translate X="3" Y="3" Z="3" />
                 <scale X="0.2" Y="0.2" Z="0.2" />
-                <translate time="10">
-                    <point X="-1" Y="-1" Z="0" />
-                    <point X="-1" Y="1" Z="0" />
-                    <point X="1" Y="1" Z="0" />
-                    <point X="0" Y="0" Z="0" />
-                    <point X="1" Y="-1" Z="0" />
-                </translate>
                 <models>
                     <model file="../../sphere.3d" />
                 </models>

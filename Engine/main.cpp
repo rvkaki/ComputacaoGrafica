@@ -24,9 +24,17 @@ typedef struct curva {
 	Vertices pontos;
 } Curva;
 
+typedef struct rotate {
+	int valid;
+	int angle;
+	float time;
+	vertice eixos;
+} Rotate;
+
 typedef struct group {
 	Transformations trans;
 	Curva c;
+	Rotate rot;
 	Vertices v;
 	std::vector<struct group> subGroups;
 } Group;
@@ -131,7 +139,6 @@ void renderCatmullRomCurve(Curva curva) {
 	glEnd();
 }
 
-
 void changeSize(int w, int h) {
 	// Prevent a divide by zero, when window is too short
 	// (you cant make a window with zero width).
@@ -198,7 +205,7 @@ void addGroup(XMLElement *group, Group *parent) {
 		if(name == "translate") {
 			Curva c;
 			float time;
-			if((time = elem->FloatAttribute("time"))) {
+			if((time = elem -> FloatAttribute("time"))) {
 				curG.c.valid = 1;
 				curG.c.time = time;
 
@@ -214,17 +221,27 @@ void addGroup(XMLElement *group, Group *parent) {
 		}
 
 		else if(name == "rotate") {
-			transformation t (std::make_tuple('R', elem->FloatAttribute("A"), elem->FloatAttribute("X"), elem->FloatAttribute("Y"), elem->FloatAttribute("Z")));
-			curG.trans.push_back(t);
+			float time;
+			if((time = elem -> FloatAttribute("time"))) {
+				curG.rot.valid = 1;
+				curG.rot.time = time;
+				curG.rot.angle = 360;
+				vertice r (std::make_tuple(elem -> FloatAttribute("X"), elem -> FloatAttribute("Y"), elem -> FloatAttribute("Z")));
+				curG.rot.eixos = r;
+			} else {
+				curG.rot.valid = 0;
+				transformation t (std::make_tuple('R', elem -> FloatAttribute("A"), elem -> FloatAttribute("X"), elem -> FloatAttribute("Y"), elem -> FloatAttribute("Z")));
+				curG.trans.push_back(t);
+			}
 		}
 
 		else if(name == "scale") {
-			transformation t (std::make_tuple('S', elem->FloatAttribute("X"), elem->FloatAttribute("Y"), elem->FloatAttribute("Z"), 0));
+			transformation t (std::make_tuple('S', elem -> FloatAttribute("X"), elem -> FloatAttribute("Y"), elem -> FloatAttribute("Z"), 0));
 			curG.trans.push_back(t);
 		}
 
 		else if(name == "color") {
-			transformation t (std::make_tuple('C', elem->FloatAttribute("R"), elem->FloatAttribute("G"), elem->FloatAttribute("B"), 0));
+			transformation t (std::make_tuple('C', elem -> FloatAttribute("R"), elem -> FloatAttribute("G"), elem -> FloatAttribute("B"), 0));
 			curG.trans.push_back(t);
 		}
 
@@ -245,7 +262,7 @@ void addGroup(XMLElement *group, Group *parent) {
 	if (parent == nullptr) {
 		allGroups.push_back(curG);
 	} else {
-		parent->subGroups.push_back(curG);
+		parent -> subGroups.push_back(curG);
 	}
 }
 
@@ -287,17 +304,24 @@ void drawGroup(Group g, float t) {
 		}
 	}
 
+
+	// Translação
 	if(g.c.valid == 1){
 		renderCatmullRomCurve(g.c);
 		float pos[3] = {0, 0, 0};
 		float deriv[3] = {0, 0, 0};
 		getGlobalCatmullRomPoint(t, pos, deriv, g.c.pontos);
 		glTranslatef(pos[0], pos[1], pos[2]);
+	}
 
-		// rotate
-		cross(deriv,y,z);
-		buildRotMatrix(deriv,y,z,(float *)m);
-		glMultMatrixf((float *)m);
+	glPushMatrix();
+
+	// Rotação
+	if(g.rot.valid == 1) {
+		float gt = glutGet(GLUT_ELAPSED_TIME);
+		while(gt > g.rot.time) gt -= g.rot.time;
+		printf("%f\n", gt);
+		glRotatef((g.rot.angle / g.rot.time) * gt, std::get<0>(g.rot.eixos), std::get<1>(g.rot.eixos), std::get<2>(g.rot.eixos));
 	}
 
 
@@ -307,13 +331,14 @@ void drawGroup(Group g, float t) {
 		if (!color) {
         	glColor3f(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX);
 		} else {
-			// float var = (rand() / (float) RAND_MAX) / 5;
-			glColor3f(R, G, B);
+			float var = rand() / (float) RAND_MAX / 5;
+			glColor3f(R + var, G + var, B + var);
 		}
         glVertex3f(std::get<0>(v), std::get<1>(v), std::get<2>(v));
     }
     glEnd();
 
+	glPopMatrix();
 	
 	for(Group sg: g.subGroups) {
 		drawGroup(sg, t);
