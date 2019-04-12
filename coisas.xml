@@ -27,7 +27,6 @@
         <group>
             <color R="0.0" G="0.5" B="1.0"/>
             <translate X="50" Y="0" Z="0" />
-            <rotate A="30" X="1" Y="0" Z="0" />
             <models>
                 <model file="../../sphere.3d" />
             </models>
@@ -36,7 +35,6 @@
                 <color R="0.7" G="0.7" B="0.7"/>
                 <translate X="3" Y="3" Z="3" />
                 <scale X="0.2" Y="0.2" Z="0.2" />
-                <rotate A="-30" X="1" Y="0" Z="0" />
                 <translate time="10">
                     <point X="-1" Y="-1" Z="0" />
                     <point X="-1" Y="1" Z="0" />

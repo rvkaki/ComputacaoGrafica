@@ -199,15 +199,15 @@ void addGroup(XMLElement *group, Group *parent) {
 			Curva c;
 			float time;
 			if((time = elem->FloatAttribute("time"))) {
-				c.valid = 1;
+				curG.c.valid = 1;
 				curG.c.time = time;
-				XMLElement *t = group -> FirstChildElement("translate");
-				for(XMLElement *point = t -> FirstChildElement(); point != nullptr; point = point -> NextSiblingElement()) {
+
+				for(XMLElement *point = elem -> FirstChildElement(); point != nullptr; point = point -> NextSiblingElement()) {
 					vertice p (std::make_tuple(point->FloatAttribute("X"), point->FloatAttribute("Y"), point->FloatAttribute("Z")));
 					curG.c.pontos.push_back(p);
 				}
 			} else {
-				c.valid = 0;
+				curG.c.valid = 0;
 				transformation t (std::make_tuple('T', elem->FloatAttribute("X"), elem->FloatAttribute("Y"), elem->FloatAttribute("Z"), 0));
 				curG.trans.push_back(t);
 			}
@@ -250,36 +250,34 @@ void addGroup(XMLElement *group, Group *parent) {
 }
 
 
-void drawGroup(Group g) {
+void drawGroup(Group g, float t) {
 
-	static float t = 0;
 	float m[4][4];
-	
 	glPushMatrix();
 
 	float R, G, B;
 	bool color = false;
 
 	// Transformations
-	for(transformation t: g.trans) {
-		switch(std::get<0>(t)) {
+	for(transformation tr: g.trans) {
+		switch(std::get<0>(tr)) {
 			case 'T':
-				glTranslatef(std::get<1>(t), std::get<2>(t), std::get<3>(t));
+				glTranslatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
 				break;
 
 			case 'R':
-				glRotatef(std::get<1>(t), std::get<2>(t), std::get<3>(t), std::get<4>(t));
+				glRotatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr), std::get<4>(tr));
 				break;
 				
 			case 'S':
-				glScalef(std::get<1>(t), std::get<2>(t), std::get<3>(t));
+				glScalef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
 				break;
 
 			case 'C':
-				if(std::get<1>(t) != 0 || std::get<2>(t) != 0 || std::get<3>(t) != 0) {
-					R = std::get<1>(t);
-					G = std::get<2>(t);
-					B = std::get<3>(t);
+				if(std::get<1>(tr) != 0 || std::get<2>(tr) != 0 || std::get<3>(tr) != 0) {
+					R = std::get<1>(tr);
+					G = std::get<2>(tr);
+					B = std::get<3>(tr);
 					color = true;
 				}
 				break;
@@ -289,10 +287,8 @@ void drawGroup(Group g) {
 		}
 	}
 
-
 	if(g.c.valid == 1){
 		renderCatmullRomCurve(g.c);
-	
 		float pos[3] = {0, 0, 0};
 		float deriv[3] = {0, 0, 0};
 		getGlobalCatmullRomPoint(t, pos, deriv, g.c.pontos);
@@ -320,20 +316,22 @@ void drawGroup(Group g) {
 
 	
 	for(Group sg: g.subGroups) {
-		drawGroup(sg);
+		drawGroup(sg, t);
 	}
 
 	glPopMatrix();
 
 }
 
-void drawVertices() {
+void drawVertices(float t) {
     for(Group g: allGroups) {
-		drawGroup(g);
+		drawGroup(g, t);
 	}
 }
 
 void renderScene() {
+	static float t = 0;
+
 	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -345,10 +343,12 @@ void renderScene() {
 
 	glTranslatef(xd, 0, zd);
 
-    drawVertices();
+    drawVertices(t);
 
 	// End of frame
 	glutSwapBuffers();
+
+	t += 0.01;
 }
 
 
@@ -462,13 +462,13 @@ int main(int argc, char **argv) {
     for(; group != nullptr; group = group -> NextSiblingElement("group")) {
         addGroup(group, nullptr);
     }
-
+	
 	// init GLUT and the window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(100, 100);
 	glutInitWindowSize(800, 800);
-	glutCreateWindow("1Fase-Engine");
+	glutCreateWindow("3Fase-Engine");
 
 	// Required callback registry 
 	glutDisplayFunc(renderScene);
