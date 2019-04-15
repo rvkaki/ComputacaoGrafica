@@ -42,12 +42,22 @@ typedef std::vector<Group> Groups;
 
 Groups allGroups;
 
+float* multMatrixVector(float *m, float *v, float *res) {
+	for (int j = 0; j < 4; j++) {
+		res[j] = 0;
+		for (int k = 0; k < 4; k++) {
+			res[j] += v[j * 4 + k] * m[j + k * 4];
+		}
+	}
+}
+
 void multVectorVector(float v1[4], float v2[4], float res) {
 	res = 0;
 	for (int j = 0; j < 4; ++j) {
 		res += v1[j] * v2[j];
 	}
 }
+
 
 void multMatrixMatrix(float m1[4][4], float m2[4][4], float res[4][4]) {
 	float aux[4];
@@ -245,71 +255,74 @@ void drawGroup(Group g, float m[4][4]) {
 
 	pts = (float*)malloc(total * sizeof(float));
 	//float m[4][4];
-	glPushMatrix();
+	//glPushMatrix();
 
-	float R, G, B, angle;
+	float R, G, B, a;
 	bool color = false;
 	float x, y, z, time;
 	float res[4][4];
+	
 
 	// Transformations
 	for(transformation tr: g.trans) {
 		switch(std::get<0>(tr)) {
 			case 'T':
 				//glTranslatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
-				
+				{
 				float trans[4][4] = {{1, 0, 0, std::get<1>(tr)},
-									 {0, 1, 0, std::get<2>(tr)}
-									 {0, 0, 1, std::get<3>(tr)}
+									 {0, 1, 0, std::get<2>(tr)},
+									 {0, 0, 1, std::get<3>(tr)},
 									 {0, 0, 0, 1}};
-				multMatrixMatrix((float *)m, trans, res);
-				m = res;
 				
+				multMatrixMatrix(m, trans, res);
+				m = res;
+				}
 				break;
 
 			case 'I':
+				{
 				time = std::get<1>(tr)/accelerator;
-				angle = fmod(float(glutGet(GLUT_ELAPSED_TIME))/1000, abs(time))*360/time;
+				a = fmod(float(glutGet(GLUT_ELAPSED_TIME))/1000, abs(time))*360/time;
 				x = std::get<2>(tr);
 				y = std::get<3>(tr);
 				z = std::get<4>(tr);
 				//glRotatef(angle, x, y, z);
+				
 				float trans[4][4] = {{powf(x,2) + (1-powf(x,2)) * cos(a), x*y*(1-cos(a))-z*sin(a), x*z*(1-cos(a))+y*sin(a), 0},
 									 {x*y*(1-cos(a))+z*sin(a), powf(y,2) + (1-powf(y,2)) * cos(a), y*z*(1-cos(a))-x*sin(a), 0},
-									 {x*z*(1-cos(a))-y*sin(a), y*z*(1-cos(a))+x*sin(a), powf(z,2) + (1-powf(z,2)) * cos(a), 0}
+									 {x*z*(1-cos(a))-y*sin(a), y*z*(1-cos(a))+x*sin(a), powf(z,2) + (1-powf(z,2)) * cos(a), 0},
 									 {0, 0, 0, 1}};
-				multMatrixMatrix((float *)m, trans, res);
+				multMatrixMatrix(m, trans, res);
 				m = res;
-				
+				}
 				break;
 
 			case 'R':
 				//glRotatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr), std::get<4>(tr));
-				
+				{
 				a = std::get<1>(tr);
 				x = std::get<2>(tr);
 				y = std::get<3>(tr);
 				z = std::get<4>(tr);
 				float trans[4][4] = {{powf(x,2) + (1-powf(x,2)) * cos(a), x*y*(1-cos(a))-z*sin(a), x*z*(1-cos(a))+y*sin(a), 0},
 									 {x*y*(1-cos(a))+z*sin(a), powf(y,2) + (1-powf(y,2)) * cos(a), y*z*(1-cos(a))-x*sin(a), 0},
-									 {x*z*(1-cos(a))-y*sin(a), y*z*(1-cos(a))+x*sin(a), powf(z,2) + (1-powf(z,2)) * cos(a), 0}
+									 {x*z*(1-cos(a))-y*sin(a), y*z*(1-cos(a))+x*sin(a), powf(z,2) + (1-powf(z,2)) * cos(a), 0},
 									 {0, 0, 0, 1}};
-				multMatrixMatrix((float *)m, trans, res);
+				multMatrixMatrix(m, trans, res);
 				m = res;
-				
+				}
 				break;
 				
 			case 'S':
 				//glScalef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
-				
-				float *res;
+				{
 				float trans[4][4] = {{std::get<1>(tr), 0, 0, 0},
-									 {0, std::get<2>(tr), 0, 0}
-									 {0, 0, std::get<3>(tr), 0}
+									 {0, std::get<2>(tr), 0, 0},
+									 {0, 0, std::get<3>(tr), 0},
 									 {0, 0, 0, 1}};
-				multMatrixMatrix((float *)m, trans, res);
+				multMatrixMatrix(m, trans, res);
 				m = res;
-				
+				}
 				break;
 
 			case 'C':
@@ -335,10 +348,10 @@ void drawGroup(Group g, float m[4][4]) {
 		//glTranslatef(pos[0], pos[1], pos[2]);
 		
 		float trans[4][4] = {{1, 0, 0, pos[0]},
-							 {0, 1, 0, pos[1]}
-							 {0, 0, 1, pos[2]}
+							 {0, 1, 0, pos[1]},
+							 {0, 0, 1, pos[2]},
 							 {0, 0, 0, 1}};
-		multMatrixMatrix((float *)m, trans, res);
+		multMatrixMatrix(m, trans, res);
 		m = res;
 	}
 
@@ -360,17 +373,22 @@ void drawGroup(Group g, float m[4][4]) {
     }
     //glEnd();
 
-	glRotatef(-angle, x, y, z);
+	float trans[4][4] = {{powf(x,2) + (1-powf(x,2)) * cos(-a), x*y*(1-cos(-a))-z*sin(-a), x*z*(1-cos(-a))+y*sin(-a), 0},
+									 {x*y*(1-cos(-a))+z*sin(-a), powf(y,2) + (1-powf(y,2)) * cos(-a), y*z*(1-cos(-a))-x*sin(-a), 0},
+									 {x*z*(1-cos(-a))-y*sin(-a), y*z*(1-cos(-a))+x*sin(-a), powf(z,2) + (1-powf(z,2)) * cos(-a), 0},
+									 {0, 0, 0, 1}};
+	multMatrixMatrix(m, trans, res);
 	
 	for(Group sg: g.subGroups) {
 		drawGroup(sg, m);
 	}
 
-	glPopMatrix();
+	//glPopMatrix();
 
 }
 
 void drawVertices() {
+	indice = 0;
     for(Group g: allGroups) {
 		float m[4][4] = {{1, 0, 0, 0},
 						 {0, 1, 0, 0},
@@ -390,11 +408,12 @@ void renderScene() {
 		0.0, 0.0, 0.0,
 		0.0f, 1.0f, 0.0f);
 
+
+	glColor3f(1,0,0);
+	drawVertices();
+
 	glVertexPointer(3, GL_FLOAT, 0, 0);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
-
-	glTranslatef(xd, 0, zd);
-
     //drawVertices(t);
 
 	// End of frame
@@ -537,12 +556,11 @@ int main(int argc, char **argv) {
 	glEnable(GL_CULL_FACE);
 	glPolygonMode(GL_FRONT, GL_LINE);
 
-	// Buffers
+	//Buffers
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glGenBuffers(1, buffers);
 	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(pts), pts, GL_STATIC_DRAW);
-	drawVertices();
 
 	// enter GLUT's main cycle
 	glutMainLoop();
