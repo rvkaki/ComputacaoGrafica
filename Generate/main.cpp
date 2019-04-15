@@ -2,6 +2,8 @@
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
+#include <string>
+#include <vector>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -9,6 +11,12 @@
 using namespace std;
 
 ofstream f; 
+
+struct CP {
+	float x;
+	float y;
+	float z;
+};
 
 void drawVertex(float x, float y, float z) {
 	f << x << " " << y << " " << z << "\n";
@@ -108,8 +116,7 @@ void drawBox(float x, float y, float z, int div = 1){
 		}
 		x2 += xOff;
 		y2 += yOff;
-		z2 += zOff;
-		
+		z2 += zOff;	
 	}
 }
 
@@ -187,9 +194,175 @@ void drawSphere(int radius, int slices, int stacks) {
 	}
 }
 
+float* multMatrixVector(float *m, float *v, float *res) {
+	for (int j = 0; j < 4; j++) {
+		res[j] = 0;
+		for (int k = 0; k < 4; k++) {
+			res[j] += v[j * 4 + k] * m[j + k * 4];
+		}
+	}
+}
+
+CP* multMatrixCPVector(CP *cp, float *v, CP *res) {
+	for(int i = 0; i < 4; i++) {
+		res[i].x = 0;
+		res[i].y = 0;
+		res[i].z = 0;
+		for(int j = 0; j < 4; j++) {
+			res[i].x += v[j] * cp[i * 4 + j].x;
+			res[i].y += v[j] * cp[i * 4 + j].y;
+			res[i].z += v[j] * cp[i * 4 + j].z;
+		}
+	}
+}
+
+void multVectorCP(CP *cp, float *m, CP res) {
+	for(int i = 0; i < 4; i++) {
+		res.x = cp[i].x * m[i];
+		res.y = cp[i].y * m[i];
+		res.z = cp[i].z * m[i];
+	}
+}
+
+CP bezierPatch(CP *controlPoints, float u, float v) {
+
+	float U[4] = {powf(u,3), powf(u,2), powf(u,1), 1};
+	float *tmp;
+	CP res;
+	CP *cp;
+
+	float m[4][4] = {	{-0.5f,  1.5f, -1.5f,  0.5f},
+						{ 1.0f, -2.5f,  2.0f, -0.5f},
+						{-0.5f,  0.0f,  0.5f,  0.0f},
+						{ 0.0f,  1.0f,  0.0f,  0.0f}};
+
+	float bV[4] = {powf(1-v, 3),  3 * v * powf(1-v, 2), 3 * powf(v, 2) * (1-v),  powf(v, 3)};
+
+	multMatrixVector((float *)m, U, tmp);
+	multMatrixCPVector(controlPoints, tmp, cp);
+	multVectorCP(cp, (float *)bV, res);
+
+	return res;
+}
+
+CP evalBezierCurve(CP *p, float &t) {
+	float b[4];
+	CP res;
+	res.x = 0; res.y = 0; res.z = 0;
+	int i;
+
+	b[0] = powf(1-t, 3);
+	b[1] = 3 * t * powf(1-t, 2);
+	b[2] = 3 * (1-t) * powf(t, 2);
+	b[3] = powf(t, 3);
+
+	for(i = 0; i < 4; i++) {
+		p[i].x = p[i].x * b[i];
+		p[i].y = p[i].y * b[i];
+		p[i].z = p[i].z * b[i];
+	}
+
+
+	for(i = 0; i < 4; i++) {
+		res.x += p[i].x;
+		res.y += p[i].y;
+		res.z += p[i].z; 
+	}
+
+	return res;
+}
+
+CP evalBezierPatch(CP *controlPoints, float u, float v) 
+{ 
+    CP uC[4]; 
+    for (int i = 0; i < 4; ++i) {
+		uC[i] = evalBezierCurve(controlPoints + 4 * i, u);
+	}
+    return evalBezierCurve(uC, v); 
+}
+
+void drawBezier(char *patch_file, int tessellation) {
+	std::ifstream patchFile;
+	patchFile.open(patch_file);
+
+	char *line = (char *) malloc(1000);
+
+	patchFile.getline(line, 1000);
+	int numPatches = atoi(line);
+	
+	int patches[numPatches][16];
+	std::string delimiter = ", ";
+
+	for(int i = 0; i < numPatches; i++) {		
+		patchFile.getline(line, 1000);
+		std::string sep(line);
+		std::string num;
+		int pos = 0, j = 0;
+		while((pos = sep.find(delimiter)) != std::string::npos) {
+			num = sep.substr(0, pos);
+			patches[i][j] = stoi(num);
+			sep.erase(0, pos + delimiter.length());
+			j++;
+		}
+		patches[i][j] = stoi(sep);
+	}
+	
+	patchFile.getline(line, 1000);
+	int numCP = atoi(line);
+
+	CP cp[numCP];
+
+	for(int i = 0; i < numCP; i++) {
+		patchFile.getline(line, 1000);
+		std::string sep(line);
+		std::string coord;
+		int pos = 0;
+
+		pos = sep.find(delimiter);
+		coord = sep.substr(0, pos);
+		cp[i].x = stof(coord);
+		sep.erase(0, pos + delimiter.length());
+
+		pos = sep.find(delimiter);
+		coord = sep.substr(0, pos);
+		cp[i].y = stof(coord);
+		sep.erase(0, pos + delimiter.length());
+
+		pos = sep.find(delimiter);
+		coord = sep.substr(0, pos);
+		cp[i].z = stof(coord);
+		sep.erase(0, pos + delimiter.length());
+	}
+
+    CP P[(tessellation + 1) * (tessellation + 1)];
+	CP controlPoints[16];
+
+	for (int np = 0; np < numPatches; np++) { 
+		// set the control points for the current patch
+		for (int i = 0; i < 16; ++i) {
+			controlPoints[i].x = cp[patches[np][i]].x;
+			controlPoints[i].y = cp[patches[np][i]].y;
+			controlPoints[i].z = cp[patches[np][i]].z;
+		}
+
+		// generate grid
+		for (int j = 0, k = 0; j <= tessellation; j++) {
+			for (int i = 0; i <= tessellation; i++, k++) {
+				P[k] = evalBezierPatch(controlPoints, i / (float)tessellation, j / (float)tessellation); 
+			} 
+		} 
+
+		for(CP cp: P) {
+			drawVertex(cp.x, cp.y, cp.z);
+		}
+	}
+}
+
 int main(int argc, char **argv) {
 	int x,y,z;
 	int radius, height, stacks, slices;
+	int tessellation;
+	char *pf;
 
 	if (argc < 5) {
 		printf("É necessário indicar o ficheiro de destino e a forma geométrica a ser desenhada\n");
@@ -244,6 +417,17 @@ int main(int argc, char **argv) {
 			stacks = atoi(argv[4]);
 			drawSphere(radius, slices, stacks);
 		}
+	} else if(strcmp(argv[1], "bezier") == 0){
+		if(argc != 5) {
+			printf("Número incorreto de argumentos\nUsage: ./generate bezier <patch file> tessellation\n");
+			exit(EXIT_FAILURE);
+		} else {
+			pf = argv[2];
+			tessellation = atoi(argv[3]);
+			drawBezier(pf, tessellation);
+		}
+		
+	
 	} else {
 		printf("Figura não suportada\n");
 		exit(EXIT_FAILURE);

@@ -1,15 +1,26 @@
 <scene>
     <group>
-    <color R="1.0" G="0.55" B="0.2"/>
-    <scale X="10" Y="10" Z="10" />
+        <color R="1.0" G="0.55" B="0.2"/>
+        <rotate time="27" X="0" Y="1" Z="0"/>
+        <scale X="10" Y="10" Z="10" />
         <models>
             <model file = "../../sphere.3d"/>
         </models>
     </group>
 
         <group>
-            <color R="0.3" G="0.3" B="0.3"/>
+            <color R="1.0" G="0.55" B="0.2"/>
             <translate X="30" Y="0" Z="0" />
+            <models>
+                <model file = "../../bezier.3d"/>
+            </models>
+        </group>
+
+        <group>
+            <color R="0.3" G="0.3" B="0.3"/>
+            <rotate time="88" X="0" Y="1" Z="0"/>
+            <translate X="30" Y="0" Z="0" />
+            <rotate time="59" X="0" Y="1" Z="0"/>
             <scale X="0.5" Y="0.5" Z="0.5" />
             <models>
                 <model file="../../sphere.3d" />
@@ -18,7 +29,9 @@
 
         <group>
             <color R="1.0" G="0.6" B="0.1"/>
+            <rotate time="224.7" X="0" Y="1" Z="0"/>
             <translate X="40" Y="0" Z="0" />
+            <rotate time="-243" X="0" Y="1" Z="0"/>
             <models>
                 <model file="../../sphere.3d" />
             </models>
@@ -26,17 +39,19 @@
 
         <group>
             <color R="0.0" G="0.5" B="1.0"/>
+            <rotate time="365.2" X="0" Y="1" Z="0"/>
             <translate X="50" Y="0" Z="0" />
-            <rotate A="30" X="1" Y="0" Z="0" />
+            <rotate time="0.999" X="0" Y="1" Z="0"/>
             <models>
-                <model file="../../cone.3d" />
+                <model file="../../sphere.3d" />
             </models>
 
             <group>
                 <color R="0.7" G="0.7" B="0.7"/>
+                <rotate time="28" X="0" Y="1" Z="0"/>
                 <translate X="3" Y="3" Z="3" />
+                <rotate time="28" X="0" Y="1" Z="0"/>
                 <scale X="0.2" Y="0.2" Z="0.2" />
-                <rotate A="-30" X="1" Y="0" Z="0" />
                 <models>
                     <model file="../../sphere.3d" />
                 </models>
@@ -45,7 +60,9 @@
 
         <group>
             <color R="0.9" G="0.15" B="0.05"/>
+            <rotate time="687" X="0" Y="1" Z="0"/>
             <translate X="60" Y="0" Z="0" />
+            <rotate time="1.02" X="0" Y="1" Z="0"/>
             <models>
                 <model file="../../sphere.3d" />
             </models>
@@ -53,7 +70,9 @@
         
         <group>
             <color R="0.9" G="0.8" B="0.45"/>
+            <rotate time="4328.9" X="0" Y="1" Z="0"/>
             <translate X="75" Y="0" Z="0" />
+            <rotate time="0.413" X="0" Y="1" Z="0"/>
             <scale X="4" Y="4" Z="4" />
             <models>
                 <model file="../../sphere.3d" />
@@ -62,23 +81,20 @@
 
         <group>
             <color R="1.0" G="0.9" B="0.2"/>
+            <rotate time="10752.9" X="0" Y="1" Z="0"/>
             <translate X="95" Y="0" Z="0" />
+            <rotate time="0.4583" X="0" Y="1" Z="0"/>
             <scale X="3" Y="3" Z="3" />
             <models>
                 <model file="../../sphere.3d" />
             </models>
-            <group>
-                <color R="0.7" G="0.4" B="0.2" />
-                <rotate A="45" X="0" Y="0" Z="1" />
-                <models>
-                    <model file="../../plane.3d" />
-                </models>
-            </group>
         </group>
 
         <group>
             <color R="0.2" G="1.0" B="1.0"/>
+            <rotate time="30660" X="0" Y="1" Z="0"/>
             <translate X="110" Y="0" Z="0" />
+            <rotate time="-0.7083" X="0" Y="1" Z="0"/>
             <scale X="2" Y="2" Z="2" />
             <models>
                 <model file="../../sphere.3d" />
@@ -87,7 +103,9 @@
 
         <group>
             <color R="0.0" G="0.4" B="0.9"/>
+            <rotate time="60225" X="0" Y="1" Z="0"/>
             <translate X="120" Y="0" Z="0" />
+            <rotate time="0.6667" X="0" Y="1" Z="0"/>
             <scale X="2" Y="2" Z="2" />
             <models>
                 <model file="../../sphere.3d" />
