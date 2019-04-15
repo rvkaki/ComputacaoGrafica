@@ -326,11 +326,11 @@ void drawGroup(Group g) {
 			case 'R':
 				glRotatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr), std::get<4>(tr));
 				{
+				/*
 				a = std::get<1>(tr);
 				x = std::get<2>(tr);
 				y = std::get<3>(tr);
 				z = std::get<4>(tr);
-				/*
 				float trans[4][4] = {{powf(x,2) + (1-powf(x,2)) * cos(a), x*y*(1-cos(a))-z*sin(a), x*z*(1-cos(a))+y*sin(a), 0},
 									 {x*y*(1-cos(a))+z*sin(a), powf(y,2) + (1-powf(y,2)) * cos(a), y*z*(1-cos(a))-x*sin(a), 0},
 									 {x*z*(1-cos(a))-y*sin(a), y*z*(1-cos(a))+x*sin(a), powf(z,2) + (1-powf(z,2)) * cos(a), 0},
@@ -370,7 +370,7 @@ void drawGroup(Group g) {
 	}
 
 	// Translação
-	if(g.c.valid == 1){
+	if(g.c.valid == 1) {
 		float pos[3] = {0, 0, 0};
 		float deriv[3] = {0, 0, 0};
 		getGlobalCatmullRomPoint(float(float(glutGet(GLUT_ELAPSED_TIME))/1000/g.c.time), pos, deriv, g.c.pontos);
