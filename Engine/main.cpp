@@ -42,6 +42,31 @@ typedef std::vector<Group> Groups;
 
 Groups allGroups;
 
+void buildRotMatrix(float *x, float *y, float *z, float *m) {
+
+	m[0] = x[0]; m[1] = x[1]; m[2] = x[2]; m[3] = 0;
+	m[4] = y[0]; m[5] = y[1]; m[6] = y[2]; m[7] = 0;
+	m[8] = z[0]; m[9] = z[1]; m[10] = z[2]; m[11] = 0;
+	m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+}
+
+
+void cross(float *a, float *b, float *res) {
+
+	res[0] = a[1]*b[2] - a[2]*b[1];
+	res[1] = a[2]*b[0] - a[0]*b[2];
+	res[2] = a[0]*b[1] - a[1]*b[0];
+}
+
+
+void normalize(float *a) {
+
+	float l = sqrt(a[0]*a[0] + a[1] * a[1] + a[2] * a[2]);
+	a[0] = a[0]/l;
+	a[1] = a[1]/l;
+	a[2] = a[2]/l;
+}
+
 float* multMatrixVector(float *m, float *v, float *res) {
 	for (int j = 0; j < 4; j++) {
 		res[j] = 0;
@@ -76,7 +101,6 @@ void getCatmullRomPoint(float t, vertice v0, vertice v1, vertice v2, vertice v3,
 	// T matrix
 	float T[4] = {powf(t,3), powf(t,2), t, 1};
 	float T1[4] = {3*powf(t,2), 2*t, 1, 0};
-
 
 	// catmull-rom matrix
 	float m[4][4] = {	{-0.5f,  1.5f, -1.5f,  0.5f},
@@ -251,24 +275,24 @@ void addGroup(XMLElement *group, Group *parent) {
 }
 
 
-void drawGroup(Group g, float m[4][4]) {
+void drawGroup(Group g) {
 
-	pts = (float*)malloc(total * sizeof(float));
-	//float m[4][4];
-	//glPushMatrix();
+	//pts = (float*)malloc(total * sizeof(float));
+	glPushMatrix();
 
-	float R, G, B, a;
+	float R, G, B;
 	bool color = false;
-	float x, y, z, time;
-	float res[4][4];
+	float a, x, y, z, time;
+	int rots = 0;
+	//float res[4][4];
 	
 
 	// Transformations
 	for(transformation tr: g.trans) {
 		switch(std::get<0>(tr)) {
 			case 'T':
-				//glTranslatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
-				{
+				glTranslatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
+				/*{
 				float trans[4][4] = {{1, 0, 0, std::get<1>(tr)},
 									 {0, 1, 0, std::get<2>(tr)},
 									 {0, 0, 1, std::get<3>(tr)},
@@ -276,7 +300,7 @@ void drawGroup(Group g, float m[4][4]) {
 				
 				multMatrixMatrix(m, trans, res);
 				m = res;
-				}
+				}*/
 				break;
 
 			case 'I':
@@ -286,42 +310,48 @@ void drawGroup(Group g, float m[4][4]) {
 				x = std::get<2>(tr);
 				y = std::get<3>(tr);
 				z = std::get<4>(tr);
-				//glRotatef(angle, x, y, z);
-				
+				rots++;
+				glRotatef(a, x, y, z);
+				/*
 				float trans[4][4] = {{powf(x,2) + (1-powf(x,2)) * cos(a), x*y*(1-cos(a))-z*sin(a), x*z*(1-cos(a))+y*sin(a), 0},
 									 {x*y*(1-cos(a))+z*sin(a), powf(y,2) + (1-powf(y,2)) * cos(a), y*z*(1-cos(a))-x*sin(a), 0},
 									 {x*z*(1-cos(a))-y*sin(a), y*z*(1-cos(a))+x*sin(a), powf(z,2) + (1-powf(z,2)) * cos(a), 0},
 									 {0, 0, 0, 1}};
 				multMatrixMatrix(m, trans, res);
 				m = res;
+				*/
 				}
 				break;
 
 			case 'R':
-				//glRotatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr), std::get<4>(tr));
+				glRotatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr), std::get<4>(tr));
 				{
 				a = std::get<1>(tr);
 				x = std::get<2>(tr);
 				y = std::get<3>(tr);
 				z = std::get<4>(tr);
+				/*
 				float trans[4][4] = {{powf(x,2) + (1-powf(x,2)) * cos(a), x*y*(1-cos(a))-z*sin(a), x*z*(1-cos(a))+y*sin(a), 0},
 									 {x*y*(1-cos(a))+z*sin(a), powf(y,2) + (1-powf(y,2)) * cos(a), y*z*(1-cos(a))-x*sin(a), 0},
 									 {x*z*(1-cos(a))-y*sin(a), y*z*(1-cos(a))+x*sin(a), powf(z,2) + (1-powf(z,2)) * cos(a), 0},
 									 {0, 0, 0, 1}};
 				multMatrixMatrix(m, trans, res);
 				m = res;
+				*/
 				}
 				break;
 				
 			case 'S':
-				//glScalef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
+				glScalef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
 				{
+				/*
 				float trans[4][4] = {{std::get<1>(tr), 0, 0, 0},
 									 {0, std::get<2>(tr), 0, 0},
 									 {0, 0, std::get<3>(tr), 0},
 									 {0, 0, 0, 1}};
 				multMatrixMatrix(m, trans, res);
 				m = res;
+				*/
 				}
 				break;
 
@@ -339,24 +369,36 @@ void drawGroup(Group g, float m[4][4]) {
 		}
 	}
 
-
 	// Translação
 	if(g.c.valid == 1){
 		float pos[3] = {0, 0, 0};
 		float deriv[3] = {0, 0, 0};
-		getGlobalCatmullRomPoint(glutGet(GLUT_ELAPSED_TIME), pos, deriv, g.c.pontos);
-		//glTranslatef(pos[0], pos[1], pos[2]);
-		
+		getGlobalCatmullRomPoint(float(float(glutGet(GLUT_ELAPSED_TIME))/1000/g.c.time), pos, deriv, g.c.pontos);
+		glTranslatef(pos[0], pos[1], pos[2]);
+
+		float z2[3];
+		float y2[3] = {0,0,1};
+		float mr[4][4];
+
+		cross(deriv, y2, z2);
+		normalize(z2);
+		cross(z2, deriv, y2);
+		normalize(y2);
+		normalize(deriv);
+		buildRotMatrix(deriv, y2, z2, (float *)mr);
+		glMultMatrixf((float *)mr);
+		/*
 		float trans[4][4] = {{1, 0, 0, pos[0]},
 							 {0, 1, 0, pos[1]},
 							 {0, 0, 1, pos[2]},
 							 {0, 0, 0, 1}};
 		multMatrixMatrix(m, trans, res);
 		m = res;
+		*/
 	}
 
 	// Vertices
-	//glBegin(GL_TRIANGLES);
+	glBegin(GL_TRIANGLES);
     for(vertice v : g.v) {
 		if (!color) {
         	glColor3f(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX);
@@ -364,37 +406,44 @@ void drawGroup(Group g, float m[4][4]) {
 			float var = rand() / (float) RAND_MAX / 5;
 			glColor3f(R + var, G + var, B + var);
 		}
-        //glVertex3f(std::get<0>(v), std::get<1>(v), std::get<2>(v));
-		
+        glVertex3f(std::get<0>(v), std::get<1>(v), std::get<2>(v));
+		/*
 		pts[indice++] = std::get<0>(v);
 		pts[indice++] = std::get<1>(v);
 		pts[indice++] = std::get<2>(v);
-		
+		*/
     }
-    //glEnd();
+    glEnd();
 
+	if(rots >= 2) {
+		glRotatef(-a, x, y, z);
+	}
+	/*
 	float trans[4][4] = {{powf(x,2) + (1-powf(x,2)) * cos(-a), x*y*(1-cos(-a))-z*sin(-a), x*z*(1-cos(-a))+y*sin(-a), 0},
 									 {x*y*(1-cos(-a))+z*sin(-a), powf(y,2) + (1-powf(y,2)) * cos(-a), y*z*(1-cos(-a))-x*sin(-a), 0},
 									 {x*z*(1-cos(-a))-y*sin(-a), y*z*(1-cos(-a))+x*sin(-a), powf(z,2) + (1-powf(z,2)) * cos(-a), 0},
 									 {0, 0, 0, 1}};
 	multMatrixMatrix(m, trans, res);
-	
+	*/
+
 	for(Group sg: g.subGroups) {
-		drawGroup(sg, m);
+		drawGroup(sg);
 	}
 
-	//glPopMatrix();
+	glPopMatrix();
 
 }
 
 void drawVertices() {
 	indice = 0;
     for(Group g: allGroups) {
+		/*
 		float m[4][4] = {{1, 0, 0, 0},
 						 {0, 1, 0, 0},
 						 {0, 0, 1, 0},
 						 {0, 0, 0, 1}};
-		drawGroup(g, m);
+		*/
+		drawGroup(g);
 	}
 }
 
@@ -412,6 +461,7 @@ void renderScene() {
 	glColor3f(1,0,0);
 	drawVertices();
 
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
 	glVertexPointer(3, GL_FLOAT, 0, 0);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
     //drawVertices(t);
@@ -419,7 +469,6 @@ void renderScene() {
 	// End of frame
 	glutSwapBuffers();
 }
-
 
 void processKeys(unsigned char c, int xx, int yy) {
 	// put code to process regular keys in here
@@ -531,8 +580,6 @@ int main(int argc, char **argv) {
     for(; group != nullptr; group = group -> NextSiblingElement("group")) {
         addGroup(group, nullptr);
     }
-
-	printf("%d\n", total);
 	
 	// init GLUT and the window
 	glutInit(&argc, argv);
@@ -554,7 +601,6 @@ int main(int argc, char **argv) {
 	//  OpenGL settings
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glPolygonMode(GL_FRONT, GL_LINE);
 
 	//Buffers
 	glEnableClientState(GL_VERTEX_ARRAY);

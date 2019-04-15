@@ -336,25 +336,47 @@ void drawBezier(char *patch_file, int tessellation) {
 
     CP P[(tessellation + 1) * (tessellation + 1)];
 	CP controlPoints[16];
+	CP pos;
+	std::vector<CP> vertices;
+	std::vector<int> indexes;
 
 	for (int np = 0; np < numPatches; np++) { 
-		// set the control points for the current patch
-		for (int i = 0; i < 16; ++i) {
-			controlPoints[i].x = cp[patches[np][i]].x;
-			controlPoints[i].y = cp[patches[np][i]].y;
-			controlPoints[i].z = cp[patches[np][i]].z;
-		}
+		
+		for (int j = 0; j <= tessellation; j++) {
 
-		// generate grid
-		for (int j = 0, k = 0; j <= tessellation; j++) {
-			for (int i = 0; i <= tessellation; i++, k++) {
-				P[k] = evalBezierPatch(controlPoints, i / (float)tessellation, j / (float)tessellation); 
-			} 
-		} 
+			for (int k = 0; k <= tessellation; k++) { 
+				// set the control points for the current patch
+				for (int i = 0; i < 16; ++i) {
+					controlPoints[i].x = cp[patches[np][i]].x;
+					controlPoints[i].y = cp[patches[np][i]].y;
+					controlPoints[i].z = cp[patches[np][i]].z;
+				}
+				pos = evalBezierPatch(controlPoints, j / (float)tessellation, k / (float)tessellation);
 
-		for(CP cp: P) {
-			drawVertex(cp.x, cp.y, cp.z);
+				vertices.push_back(pos); 
+			}
 		}
+	}
+
+	for(int np = 0; np < numPatches; np++) {
+		int patch = (tessellation + 1) * (tessellation + 1) * np;
+
+		for(int i = 0; i < tessellation; i++) {
+			for(int j = 0; j < tessellation; j++) {
+				indexes.push_back(patch + (tessellation + 1) * i + j);
+				indexes.push_back(patch + (tessellation + 1) * (i + 1) + j + 1);
+				indexes.push_back(patch + (tessellation + 1) * i + j + 1);
+			
+				indexes.push_back(patch + (tessellation + 1) * i + j);
+				indexes.push_back(patch + (tessellation + 1) * (i + 1) + j);
+				indexes.push_back(patch + (tessellation + 1) * (i + 1) + j + 1);
+			}
+		}
+	}
+
+	for(int i: indexes) {
+		CP c = vertices.at(i);
+		drawVertex(c.x, c.y, c.z);
 	}
 }
 

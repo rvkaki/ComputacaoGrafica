@@ -10,7 +10,16 @@
 
         <group>
             <color R="1.0" G="0.55" B="0.2"/>
-            <translate X="30" Y="0" Z="0" />
+            <translate time="10">
+                <point X="-30" Y="0" Z="0"/>
+                <point X="-24" Y="27" Z="0"/>
+                <point X="0" Y="33" Z="0"/>
+                <point X="24" Y="27" Z="0"/>
+                <point X="30" Y="0" Z="0"/>
+                <point X="24" Y="-27" Z="0"/>
+                <point X="0" Y="-33" Z="0"/>
+                <point X="-27" Y="-27" Z="0"/>
+            </translate>
             <models>
                 <model file = "../../bezier.3d"/>
             </models>
