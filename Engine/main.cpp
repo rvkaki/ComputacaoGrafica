@@ -14,7 +14,7 @@ using namespace tinyxml2;
 int numModels = 0;
 GLuint *buffers;
 
-int total = 0, indice = 0;
+int total = 0;
 
 GLdouble dist = 100, beta = M_PI_4, alpha = M_PI_4, xd = 0, zd = 0;
 
@@ -33,6 +33,8 @@ typedef struct curva {
 } Curva;
 
 struct model {
+	int indice;
+	int numVertices;
 	std::vector<vertice> vertices;
 } Model;
 
@@ -205,11 +207,17 @@ vertice extractVertice(std::string s) {
     return vertice(x, y, z);
 }
 
-void addVertices(std::ifstream &vertices, Group *g) {
+model addVertices(std::ifstream &vertices) {
     char x[100];
+	model md;
+	int numVertices = 0;
     while(vertices.getline(x, 100)) {
-		g->models.vertices.push_back(extractVertice(x));
+		md.vertices.push_back(extractVertice(x));
+		numVertices++;
     }
+	md.indice = numModels;
+	md.numVertices = numVertices;
+	return md;
 }
 
 void addGroup(XMLElement *group, Group *parent) {
@@ -261,9 +269,9 @@ void addGroup(XMLElement *group, Group *parent) {
 			for(XMLElement *model = elem -> FirstChildElement("model"); model != nullptr; model = model -> NextSiblingElement("model")) {
 				std::ifstream f;
 				f.open(model->Attribute("file"));
-				addVertices(f, &curG);
+				curG.models.push_back(addVertices(f));
 				f.close();
-				numModels ++;
+				numModels++;
 			}
 		}
 
@@ -279,6 +287,15 @@ void addGroup(XMLElement *group, Group *parent) {
 	}
 }
 
+
+void drawVBOs(std::vector<struct model> models) {
+	for(model m: models){
+		glBindBuffer(GL_ARRAY_BUFFER,buffers[m.indice]);
+		glVertexPointer(3,GL_FLOAT,0,0);
+
+		glDrawArrays(GL_TRIANGLES, 0, m.numVertices);
+	}
+}
 
 void drawGroup(Group g) {
 
@@ -351,24 +368,14 @@ void drawGroup(Group g) {
 	}
 
 	// Vertices
-	glBegin(GL_TRIANGLES);
-    for(vertice v : g.v) {
-		if (!color) {
-        	glColor3f(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX);
-		} else {
-			float var = rand() / (float) RAND_MAX / 5;
-			glColor3f(R + var, G + var, B + var);
-		}
-        glVertex3f(std::get<0>(v), std::get<1>(v), std::get<2>(v));
-		/*
-		pts[indice++] = std::get<0>(v);
-		pts[indice++] = std::get<1>(v);
-		pts[indice++] = std::get<2>(v);
-		*/
-    }
-    glEnd();
+	if (!color) {
+		glColor3f(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX);
+	} else {
+		float var = rand() / (float) RAND_MAX / 5;
+		glColor3f(R, G, B);
+	}
 
-    drawVBOs()
+    drawVBOs(g.models);
 
 
 	if(rots >= 2) {
@@ -384,32 +391,20 @@ void drawGroup(Group g) {
 }
 
 void drawVertices() {
-	indice = 0;
     for(Group g: allGroups) {
-		drawGroup();
+		drawGroup(g);
 	}
 }
 
-int fillVBOs(Group g, int indice) {
+void fillVBOs(Group g) {
 	for(auto m: g.models) {
-		glBindBuffer(GL_ARRAY_BUFFER, buffers[indice]);
-		glBufferData(GL_ARRAY_BUFFER, m.vertices.size() * 3, m.vertices.data(), GL_STATIC_DRAW);
-		indice ++;
+		glBindBuffer(GL_ARRAY_BUFFER, buffers[m.indice]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m.numVertices * 3, m.vertices.data(), GL_STATIC_DRAW);
 
 		for(auto sg: g.subGroups) {
-			indice = fillVBOs(sg, indice);
+			fillVBOs(sg);
 		}
 	}
-
-	return indice;
-}
-
-void drawVBOs(int size, int indice) {
-		
-	glBindBuffer(GL_ARRAY_BUFFER,buffers[indice]);
-	glVertexPointer(3,GL_FLOAT,0,0);
-
-	glDrawArrays(GL_TRIANGLES, 0, size);
 }
 
 
@@ -452,7 +447,7 @@ void processKeys(unsigned char c, int xx, int yy) {
 			break;
 
 		case 'd':
-			xd += deltaToMove;g
+			xd += deltaToMove;
 			zd -= deltaToMove;
 			break;
 
@@ -569,9 +564,8 @@ int main(int argc, char **argv) {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glGenBuffers(numModels, buffers);
 
-	int indice = 0;
 	for(Group g: allGroups) {
-		indice = fillVBOs(g, indice);
+		fillVBOs(g);
 	}
 
 	// enter GLUT's main cycle
