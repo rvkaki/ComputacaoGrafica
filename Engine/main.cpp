@@ -368,6 +368,9 @@ void drawGroup(Group g) {
     }
     glEnd();
 
+    drawVBOs()
+
+
 	if(rots >= 2) {
 		glRotatef(-a, x, y, z);
 	}
@@ -383,7 +386,7 @@ void drawGroup(Group g) {
 void drawVertices() {
 	indice = 0;
     for(Group g: allGroups) {
-		drawGroup(g);
+		drawGroup();
 	}
 }
 
@@ -401,6 +404,15 @@ int fillVBOs(Group g, int indice) {
 	return indice;
 }
 
+void drawVBOs(int size, int indice) {
+		
+	glBindBuffer(GL_ARRAY_BUFFER,buffers[indice]);
+	glVertexPointer(3,GL_FLOAT,0,0);
+
+	glDrawArrays(GL_TRIANGLES, 0, size);
+}
+
+
 void renderScene() {
 	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -414,11 +426,6 @@ void renderScene() {
 
 	glColor3f(1,0,0);
 	drawVertices();
-
-	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
-	glVertexPointer(3, GL_FLOAT, 0, 0);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-    //drawVertices(t);
 
 	// End of frame
 	glutSwapBuffers();
@@ -445,7 +452,7 @@ void processKeys(unsigned char c, int xx, int yy) {
 			break;
 
 		case 'd':
-			xd += deltaToMove;
+			xd += deltaToMove;g
 			zd -= deltaToMove;
 			break;
 
