@@ -78,27 +78,7 @@ float* multMatrixVector(float *m, float *v, float *res) {
 	for (int j = 0; j < 4; j++) {
 		res[j] = 0;
 		for (int k = 0; k < 4; k++) {
-			res[j] += v[j * 4 + k] * m[j + k * 4];
-		}
-	}
-}
-
-void multVectorVector(float v1[4], float v2[4], float res) {
-	res = 0;
-	for (int j = 0; j < 4; ++j) {
-		res += v1[j] * v2[j];
-	}
-}
-
-
-void multMatrixMatrix(float m1[4][4], float m2[4][4], float res[4][4]) {
-	float aux[4];
-	for(int i = 0; i < 4; i++) {
-		for(int j = 0; j < 4; j++) {
-			for(int k = 0; k < 4; k++) {
-				aux[k] = m2[k][i];
-			}
-		multVectorVector(m1[i], aux, res[i][j]);
+			res[j] += v[k] * m[j * 4 + k];
 		}
 	}
 }
