@@ -11,8 +11,8 @@
 #include "tinyxml2.h"
 using namespace tinyxml2;
 
-float *pts;  
-GLuint buffers[1];
+int numModels = 0;
+GLuint *buffers;
 
 int total = 0, indice = 0;
 
@@ -32,12 +32,17 @@ typedef struct curva {
 	Vertices pontos;
 } Curva;
 
+struct model {
+	std::vector<vertice> vertices;
+} Model;
+
 typedef struct group {
 	Transformations trans;
 	Curva c;
-	Vertices v;
+	std::vector<struct model> models;
 	std::vector<struct group> subGroups;
 } Group;
+
 typedef std::vector<Group> Groups;
 
 Groups allGroups;
@@ -203,8 +208,7 @@ vertice extractVertice(std::string s) {
 void addVertices(std::ifstream &vertices, Group *g) {
     char x[100];
     while(vertices.getline(x, 100)) {
-        g->v.push_back(extractVertice(x));
-		total += 3;
+		g->models.vertices.push_back(extractVertice(x));
     }
 }
 
@@ -259,6 +263,7 @@ void addGroup(XMLElement *group, Group *parent) {
 				f.open(model->Attribute("file"));
 				addVertices(f, &curG);
 				f.close();
+				numModels ++;
 			}
 		}
 
@@ -277,30 +282,18 @@ void addGroup(XMLElement *group, Group *parent) {
 
 void drawGroup(Group g) {
 
-	//pts = (float*)malloc(total * sizeof(float));
 	glPushMatrix();
 
 	float R, G, B;
 	bool color = false;
 	float a, x, y, z, time;
-	int rots = 0;
-	//float res[4][4];
-	
+	int rots = 0;	
 
 	// Transformations
 	for(transformation tr: g.trans) {
 		switch(std::get<0>(tr)) {
 			case 'T':
 				glTranslatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
-				/*{
-				float trans[4][4] = {{1, 0, 0, std::get<1>(tr)},
-									 {0, 1, 0, std::get<2>(tr)},
-									 {0, 0, 1, std::get<3>(tr)},
-									 {0, 0, 0, 1}};
-				
-				multMatrixMatrix(m, trans, res);
-				m = res;
-				}*/
 				break;
 
 			case 'I':
@@ -312,47 +305,15 @@ void drawGroup(Group g) {
 				z = std::get<4>(tr);
 				rots++;
 				glRotatef(a, x, y, z);
-				/*
-				float trans[4][4] = {{powf(x,2) + (1-powf(x,2)) * cos(a), x*y*(1-cos(a))-z*sin(a), x*z*(1-cos(a))+y*sin(a), 0},
-									 {x*y*(1-cos(a))+z*sin(a), powf(y,2) + (1-powf(y,2)) * cos(a), y*z*(1-cos(a))-x*sin(a), 0},
-									 {x*z*(1-cos(a))-y*sin(a), y*z*(1-cos(a))+x*sin(a), powf(z,2) + (1-powf(z,2)) * cos(a), 0},
-									 {0, 0, 0, 1}};
-				multMatrixMatrix(m, trans, res);
-				m = res;
-				*/
 				}
 				break;
 
 			case 'R':
 				glRotatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr), std::get<4>(tr));
-				{
-				/*
-				a = std::get<1>(tr);
-				x = std::get<2>(tr);
-				y = std::get<3>(tr);
-				z = std::get<4>(tr);
-				float trans[4][4] = {{powf(x,2) + (1-powf(x,2)) * cos(a), x*y*(1-cos(a))-z*sin(a), x*z*(1-cos(a))+y*sin(a), 0},
-									 {x*y*(1-cos(a))+z*sin(a), powf(y,2) + (1-powf(y,2)) * cos(a), y*z*(1-cos(a))-x*sin(a), 0},
-									 {x*z*(1-cos(a))-y*sin(a), y*z*(1-cos(a))+x*sin(a), powf(z,2) + (1-powf(z,2)) * cos(a), 0},
-									 {0, 0, 0, 1}};
-				multMatrixMatrix(m, trans, res);
-				m = res;
-				*/
-				}
 				break;
 				
 			case 'S':
 				glScalef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
-				{
-				/*
-				float trans[4][4] = {{std::get<1>(tr), 0, 0, 0},
-									 {0, std::get<2>(tr), 0, 0},
-									 {0, 0, std::get<3>(tr), 0},
-									 {0, 0, 0, 1}};
-				multMatrixMatrix(m, trans, res);
-				m = res;
-				*/
-				}
 				break;
 
 			case 'C':
@@ -387,14 +348,6 @@ void drawGroup(Group g) {
 		normalize(deriv);
 		buildRotMatrix(deriv, y2, z2, (float *)mr);
 		glMultMatrixf((float *)mr);
-		/*
-		float trans[4][4] = {{1, 0, 0, pos[0]},
-							 {0, 1, 0, pos[1]},
-							 {0, 0, 1, pos[2]},
-							 {0, 0, 0, 1}};
-		multMatrixMatrix(m, trans, res);
-		m = res;
-		*/
 	}
 
 	// Vertices
@@ -418,13 +371,6 @@ void drawGroup(Group g) {
 	if(rots >= 2) {
 		glRotatef(-a, x, y, z);
 	}
-	/*
-	float trans[4][4] = {{powf(x,2) + (1-powf(x,2)) * cos(-a), x*y*(1-cos(-a))-z*sin(-a), x*z*(1-cos(-a))+y*sin(-a), 0},
-									 {x*y*(1-cos(-a))+z*sin(-a), powf(y,2) + (1-powf(y,2)) * cos(-a), y*z*(1-cos(-a))-x*sin(-a), 0},
-									 {x*z*(1-cos(-a))-y*sin(-a), y*z*(1-cos(-a))+x*sin(-a), powf(z,2) + (1-powf(z,2)) * cos(-a), 0},
-									 {0, 0, 0, 1}};
-	multMatrixMatrix(m, trans, res);
-	*/
 
 	for(Group sg: g.subGroups) {
 		drawGroup(sg);
@@ -437,14 +383,22 @@ void drawGroup(Group g) {
 void drawVertices() {
 	indice = 0;
     for(Group g: allGroups) {
-		/*
-		float m[4][4] = {{1, 0, 0, 0},
-						 {0, 1, 0, 0},
-						 {0, 0, 1, 0},
-						 {0, 0, 0, 1}};
-		*/
 		drawGroup(g);
 	}
+}
+
+int fillVBOs(Group g, int indice) {
+	for(auto m: g.models) {
+		glBindBuffer(GL_ARRAY_BUFFER, buffers[indice]);
+		glBufferData(GL_ARRAY_BUFFER, m.vertices.size() * 3, m.vertices.data(), GL_STATIC_DRAW);
+		indice ++;
+
+		for(auto sg: g.subGroups) {
+			indice = fillVBOs(sg, indice);
+		}
+	}
+
+	return indice;
 }
 
 void renderScene() {
@@ -580,7 +534,7 @@ int main(int argc, char **argv) {
     for(; group != nullptr; group = group -> NextSiblingElement("group")) {
         addGroup(group, nullptr);
     }
-	
+
 	// init GLUT and the window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -603,10 +557,15 @@ int main(int argc, char **argv) {
 	glEnable(GL_CULL_FACE);
 
 	//Buffers
+	buffers = (GLuint *)malloc(numModels * sizeof(GLuint));
+
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glGenBuffers(1, buffers);
-	glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(pts), pts, GL_STATIC_DRAW);
+	glGenBuffers(numModels, buffers);
+
+	int indice = 0;
+	for(Group g: allGroups) {
+		indice = fillVBOs(g, indice);
+	}
 
 	// enter GLUT's main cycle
 	glutMainLoop();
