@@ -18,26 +18,68 @@ struct CP {
 	float z;
 };
 
+void cross(float *a, float *b, float *res) {
+	res[0] = a[1]*b[2] - a[2]*b[1];
+	res[1] = a[2]*b[0] - a[0]*b[2];
+	res[2] = a[0]*b[1] - a[1]*b[0];
+}
+
+float* normalize(float *a) {
+	float b[3];
+	float l = sqrt(a[0]*a[0] + a[1] * a[1] + a[2] * a[2]);
+	b[0] = a[0]/l;
+	b[1] = a[1]/l;
+	b[2] = a[2]/l;
+	return b;
+}
+
+float* getVector(float *a, float *b) {
+	float res[3];
+	
+	res[0] = b[0]-a[0];
+	res[1] = b[1]-a[1];
+	res[2] = b[2]-a[2];
+	return res;
+}
+
 void drawVertex(float x, float y, float z) {
 	f << x << " " << y << " " << z << "\n";
 }
 
+void drawVertexA(float *p){
+	f << p[0] << " " << p[1] << " " << p[2] << "\n";
+}
+
 void drawPlane(float x, float z) {
     drawVertex(0, 0, z / 2);
-    drawVertex(x / 2, 0, 0);
-    drawVertex(0, 0, -z / 2);
+	drawVertex(0, 1, 0);
+	drawVertex(x / 2, 0, 0);
+	drawVertex(0, 1, 0);
+	drawVertex(0, 0, -z / 2); 
+	drawVertex(0, 1, 0);
 
-    drawVertex(0,0,-z/2);
-    drawVertex(-x/2,0,0);
-    drawVertex(0,0,z/2);
+    drawVertex(0, 0, -z/2);
+	drawVertex(0, 1, 0);
+    drawVertex(-x/2, 0, 0);
+	drawVertex(0, 1, 0);
+    drawVertex(0, 0, z/2);
+	drawVertex(0, 1, 0);
 
 	drawVertex(0, 0, -z / 2);
-    drawVertex(x / 2, 0, 0);
-    drawVertex(0, 0, z / 2);
-        
-    drawVertex(0,0,z/2);
-    drawVertex(-x/2,0,0);
-    drawVertex(0,0,-z/2);
+	drawVertex(0, -1, 0);
+	drawVertex(x / 2, 0, 0);
+	drawVertex(0, -1, 0);
+	drawVertex(0, 0, z / 2);
+	drawVertex(0, -1, 0);
+
+	drawVertex(0, 0, z/2);
+	drawVertex(0, -1, 0);
+	drawVertex(-x/2, 0, 0);
+	drawVertex(0, -1, 0);
+	drawVertex(0, 0, -z/2);
+	drawVertex(0, -1, 0);
+
+	f << "TEXTURA:";
 }
 
 void drawBox(float x, float y, float z, int div = 1){
@@ -57,57 +99,93 @@ void drawBox(float x, float y, float z, int div = 1){
 		for(float i = 0; i < div; i ++){
 			//Face superior
 			drawVertex(x1, y/2, z2);
+			drawVertex(0, 1, 0);
 			drawVertex(x1+xOff, y/2, z2+zOff);
+			drawVertex(0, 1, 0);
 			drawVertex(x1+xOff, y/2, z2);
+			drawVertex(0, 1, 0);
 
 			drawVertex(x1, y/2, z2);
+			drawVertex(0, 1, 0);
 			drawVertex(x1, y/2, z2+zOff);
+			drawVertex(0, 1, 0);
 			drawVertex(x1+xOff, y/2, z2+zOff);
+			drawVertex(0, 1, 0);
 
 			//Face inferior
 			drawVertex(x1, -y/2, z2);
-			drawVertex(x1+xOff, -y/2, z2);
-			drawVertex(x1+xOff, -y/2, z2+zOff);
+			drawVertex(0, -1, 0);
+			drawVertex(x1 + xOff, -y / 2, z2);
+			drawVertex(0, -1, 0);
+			drawVertex(x1 + xOff, -y / 2, z2 + zOff);
+			drawVertex(0, -1, 0);
 
 			drawVertex(x1, -y/2, z2);
+			drawVertex(0, -1, 0);
 			drawVertex(x1+xOff, -y/2, z2+zOff);
+			drawVertex(0, -1, 0);
 			drawVertex(x1, -y/2, z2+zOff);
-
+			drawVertex(0, -1, 0);
+			
 			//Face Lateral 1
 			drawVertex(x1, y2, z/2);
+			drawVertex(0, 0, 1);
 			drawVertex(x1+xOff, y2+yOff, z/2);
+			drawVertex(0, 0, 1);
 			drawVertex(x1, y2+yOff, z/2);
+			drawVertex(0, 0, 1);
 
 			drawVertex(x1, y2, z/2);
+			drawVertex(0, 0, 1);
 			drawVertex(x1+xOff, y2, z/2);
+			drawVertex(0, 0, 1);
 			drawVertex(x1+xOff, y2+yOff, z/2);
+			drawVertex(0, 0, 1);
 
 			//Face Lateral 2
 			drawVertex(x1, y2, -z/2);
+			drawVertex(0, 0, -1);
 			drawVertex(x1, y2+yOff, -z/2);
+			drawVertex(0, 0, -1);
 			drawVertex(x1+xOff, y2+yOff, -z/2);
+			drawVertex(0, 0, -1);
 
 			drawVertex(x1, y2, -z/2);
+			drawVertex(0, 0, -1);
 			drawVertex(x1+xOff, y2+yOff, -z/2);
+			drawVertex(0, 0, -1);
 			drawVertex(x1+xOff, y2, -z/2);
+			drawVertex(0, 0, -1);
 
 			//Face Lateral 3
 			drawVertex(x/2, y2, z1);
+			drawVertex(1, 0, 0);
 			drawVertex(x/2, y2+yOff, z1);
+			drawVertex(1, 0, 0);
 			drawVertex(x/2, y2+yOff, z1+zOff);
+			drawVertex(1, 0, 0);
 
 			drawVertex(x/2, y2, z1);
+			drawVertex(1, 0, 0);
 			drawVertex(x/2, y2+yOff, z1+zOff);
-			drawVertex(x/2, y2, z1+zOff);
+			drawVertex(1, 0, 0);
+			drawVertex(x / 2, y2, z1 + zOff);
+			drawVertex(1, 0, 0);
 
 			//Face Lateral 4
 			drawVertex(-x/2, y2, z1);
+			drawVertex(-1, 0, 0);
 			drawVertex(-x/2, y2+yOff, z1+zOff);
+			drawVertex(-1, 0, 0);
 			drawVertex(-x/2, y2+yOff, z1);
+			drawVertex(-1, 0, 0);
 
 			drawVertex(-x/2, y2, z1);
+			drawVertex(-1, 0, 0);
 			drawVertex(-x/2, y2, z1+zOff);
+			drawVertex(-1, 0, 0);
 			drawVertex(-x/2, y2+yOff, z1+zOff);
+			drawVertex(-1, 0, 0);
 
 
 			x1 += xOff;
@@ -118,6 +196,8 @@ void drawBox(float x, float y, float z, int div = 1){
 		y2 += yOff;
 		z2 += zOff;	
 	}
+
+	f << "TEXTURA:";
 }
 
 void drawCone(float radius, float height, int slices, int stacks) {
@@ -128,8 +208,11 @@ void drawCone(float radius, float height, int slices, int stacks) {
 
 	for (int i = 0; i < slices; i++) {
 		drawVertex(0,0,0);
+		drawVertex(0, -1, 0);
 		drawVertex(radius * sin((i+1) * sl), 0, radius * cos((i+1) * sl));
+		drawVertex(0, -1, 0);
 		drawVertex(radius * sin(i*sl), 0, radius * cos(i*sl));
+		drawVertex(0, -1, 0);
 	}
 
 	nr = radius - r;
@@ -140,20 +223,46 @@ void drawCone(float radius, float height, int slices, int stacks) {
 		for(float j = 0.5*(i%2); j < slices + 0.5*(i%2); j++)
 		{
 			// Triangulas virados para cima
-			drawVertex(radius * sin(j*sl), height, radius * cos(j*sl));
-			drawVertex(radius * sin((j+1)*sl), height, radius * cos((j+1)*sl));
-			drawVertex(nr * sin((j+0.5)*sl), nh, nr * cos((j+0.5)*sl));
+			float *res1, *res2, *res3;
+			float p1[3] = {radius * sin(j*sl), height, radius * cos(j*sl)};
+			float p2[3] = {radius * sin((j+1)*sl), height, radius * cos((j+1)*sl)};
+			float p3[3] = {nr * sin((j + 0.5) * sl), nh, nr * cos((j + 0.5) * sl)};
+			
+			drawVertexA(p1);
+			p1[1] = h;
+			drawVertexA(normalize(p1));
+			drawVertexA(p2);
+			p2[1] = h;
+			drawVertexA(normalize(p2));
+			drawVertexA(p3);
+			p3[1] = h;
+			drawVertexA(normalize(p3));
 
 			j += 0.5;
 			// Triangulos virados para baixo
-			drawVertex(nr * sin((j+1)*sl), nh, nr * cos((j+1)*sl));
-			drawVertex(nr*sin(j*sl), nh, nr*cos(j*sl));
-			drawVertex(radius * sin((j+0.5)*sl), height, radius * cos((j+0.5)*sl));
+			float p1[3] = {nr * sin((j+1)*sl), nh, nr * cos((j+1)*sl)};
+			float p2[3] = {nr*sin(j*sl), nh, nr*cos(j*sl)};
+			float p3[3] = {radius * sin((j + 0.5) * sl), height, radius * cos((j + 0.5) * sl)};
+
+			drawVertexA(p1);
+			p1[1] = h;
+			drawVertexA(normalize(p1));
+			drawVertexA(p2);
+			p2[1] = h;
+			drawVertexA(normalize(p2));
+			drawVertexA(p3);
+			p3[1] = h;
+			drawVertexA(normalize(p3));
+
 			j -= 0.5;
 		}
 		radius = nr;
 		nr -= r;
 	}
+
+	f << "TEXTURA:";
+
+	//fazer as coordenadas de textura
 }
 
 void drawSphere(int radius, int slices, int stacks) {	
@@ -169,29 +278,59 @@ void drawSphere(int radius, int slices, int stacks) {
 
 		for(float j = 0.5 * (i%2); j < slices + 0.5*(i%2); j++) {
 			//Triangulos voltados para cima - metade superior
-			drawVertex(r * sin(j*sl), h, r * cos(j*sl));
-			drawVertex(r * sin((j+1)*sl), h, r * cos((j+1)*sl));
-			drawVertex(nr * sin((j+0.5)*sl), nh, nr * cos((j+0.5)*sl));
+			float p1[3] = {r * sin(j*sl), h, r * cos(j*sl)};
+			float p2[3] = {r * sin((j+1)*sl), h, r * cos((j+1)*sl)};
+			float p3[3] = {nr * sin((j+0.5)*sl), nh, nr * cos((j+0.5)*sl)};
+
+			drawVertexA(p1);
+			drawVertexA(normalize(p1));
+			drawVertexA(p2);
+			drawVertexA(normalize(p2));
+			drawVertexA(p3);
+			drawVertexA(normalize(p3));
 		
 			// Triangulos voltados para cima - metade inferior
-			drawVertex(r*sin(j*sl), -h, r*cos(j*sl));
-			drawVertex(nr*sin((j+0.5)*sl), -nh, nr*cos((j+0.5)*sl));
-			drawVertex(r*sin((j+1)*sl), -h, r*cos((j+1)*sl));
+			float p1[3] = {r*sin(j*sl), -h, r*cos(j*sl)};
+			float p2[3] = {nr*sin((j+0.5)*sl), -nh, nr*cos((j+0.5)*sl)};
+			float p3[3] = {r*sin((j+1)*sl), -h, r*cos((j+1)*sl)};
+
+			drawVertexA(p1);
+			drawVertexA(normalize(p1));
+			drawVertexA(p2);
+			drawVertexA(normalize(p2));
+			drawVertexA(p3);
+			drawVertexA(normalize(p3));
 
 			j += 0.5;
 			// Triangulos voltados para baixo - metade superior
-			drawVertex(nr * sin((j+1)*sl), nh, nr * cos((j+1)*sl));
-			drawVertex(nr * sin(j*sl), nh, nr * cos(j*sl));
-			drawVertex(r * sin((j+0.5)*sl), h, r * cos((j+0.5)*sl));
+			float p1[3] = {nr * sin((j+1)*sl), nh, nr * cos((j+1)*sl)};
+			float p2[3] = {nr * sin(j*sl), nh, nr * cos(j*sl)};
+			float p3[3] = {r * sin((j+0.5)*sl), h, r * cos((j+0.5)*sl)};
+
+			drawVertexA(p1);
+			drawVertexA(normalize(p1));
+			drawVertexA(p2);
+			drawVertexA(normalize(p2));
+			drawVertexA(p3);
+			drawVertexA(normalize(p3));
 
 			// Triangulos voltados para baixo - metade inferior
-			drawVertex(nr * sin((j+1)*sl), -nh, nr * cos((j+1)*sl));
-			drawVertex(r * sin((j+0.5)*sl), -h, r*cos((j+0.5)*sl));
-			drawVertex(nr * sin(j*sl), -nh, nr*cos(j*sl));
+			float p1[3] = {nr * sin((j+1)*sl), -nh, nr * cos((j+1)*sl)};
+			float p2[3] = {r * sin((j+0.5)*sl), -h, r*cos((j+0.5)*sl)};
+			float p3[3] = {nr * sin(j*sl), -nh, nr*cos(j*sl)};
+
+			drawVertexA(p1);
+			drawVertexA(normalize(p1));
+			drawVertexA(p2);
+			drawVertexA(normalize(p2));
+			drawVertexA(p3);
+			drawVertexA(normalize(p3));
 			j -= 0.5;
 		}
 		r = nr;
 	}
+
+	f << "TEXTURA:";
 }
 
 float* multMatrixVector(float *m, float *v, float *res) {

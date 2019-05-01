@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <tuple>
+#include <IL/il.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -12,7 +13,7 @@
 using namespace tinyxml2;
 
 int numModels = 0;
-GLuint *buffers;
+GLuint *vertices, *normals, *texCoords;
 
 int total = 0;
 
@@ -35,7 +36,10 @@ typedef struct curva {
 struct model {
 	int indice;
 	int numVertices;
+	int texture;
 	std::vector<vertice> vertices;
+	std::vector<vertice> normals;
+	std::vector<vertice> texCoords;
 } Model;
 
 typedef struct group {
@@ -59,7 +63,6 @@ void buildRotMatrix(float *x, float *y, float *z, float *m) {
 
 
 void cross(float *a, float *b, float *res) {
-
 	res[0] = a[1]*b[2] - a[2]*b[1];
 	res[1] = a[2]*b[0] - a[0]*b[2];
 	res[2] = a[0]*b[1] - a[1]*b[0];
@@ -67,7 +70,6 @@ void cross(float *a, float *b, float *res) {
 
 
 void normalize(float *a) {
-
 	float l = sqrt(a[0]*a[0] + a[1] * a[1] + a[2] * a[2]);
 	a[0] = a[0]/l;
 	a[1] = a[1]/l;
@@ -189,15 +191,60 @@ vertice extractVertice(std::string s) {
 
 model addVertices(std::ifstream &vertices) {
     char x[100];
+	char y[100];
 	model md;
 	int numVertices = 0;
+
+	// Mudar ciclos while, para mudar consoante se chega às normais
     while(vertices.getline(x, 100)) {
+		vertices.getline(y, 100);
+		if(strcmp(x, "TEXTURA:") == 0 || strcmp(y, "TEXTURA:") == 0) break;
 		md.vertices.push_back(extractVertice(x));
+		md.normals.push_back(extractVertice(y));
 		numVertices++;
     }
+
+	while (vertices.getline(x, 100)) {
+		md.texCoords.push_back(extractVertice(x));
+	}
+
 	md.indice = numModels;
 	md.numVertices = numVertices;
 	return md;
+}
+
+int loadTexture(std::string s) {
+
+	unsigned int t, tw, th;
+	unsigned char *texData;
+	unsigned int texID;
+
+	ilInit();
+	ilEnable(IL_ORIGIN_SET);
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+	ilGenImages(1, &t);
+	ilBindImage(t);
+	ilLoadImage((ILstring)s.c_str());
+	tw = ilGetInteger(IL_IMAGE_WIDTH);
+	th = ilGetInteger(IL_IMAGE_HEIGHT);
+	ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+	texData = ilGetData();
+
+	glGenTextures(1, &texID);
+
+	glBindTexture(GL_TEXTURE_2D, texID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return texID;
 }
 
 void addGroup(XMLElement *group, Group *parent) {
@@ -206,7 +253,7 @@ void addGroup(XMLElement *group, Group *parent) {
     for(XMLElement *elem = group -> FirstChildElement(); elem != nullptr; elem = elem -> NextSiblingElement()) {
 		std::string name = elem->Value();
 
-		if(name == "translate") {
+		if(name == "translate") {	
 			Curva c;
 			float time;
 			if((time = elem -> FloatAttribute("time"))) {
@@ -240,18 +287,29 @@ void addGroup(XMLElement *group, Group *parent) {
 			curG.trans.push_back(t);
 		}
 
-		else if(name == "color") {
-			transformation t (std::make_tuple('C', elem -> FloatAttribute("R"), elem -> FloatAttribute("G"), elem -> FloatAttribute("B"), 0));
-			curG.trans.push_back(t);
-		}
-
 		else if(name == "models") {
 			for(XMLElement *model = elem -> FirstChildElement("model"); model != nullptr; model = model -> NextSiblingElement("model")) {
 				std::ifstream f;
 				f.open(model->Attribute("file"));
 				curG.models.push_back(addVertices(f));
 				f.close();
+
+				curG.models.at(numModels).texture = loadTexture(model->Attribute("texture"));
 				numModels++;
+			
+				// COLOR !! ultimo elemento: 0 -> diffuse, 1 -> specular, 2 -> emissive, 3 -> ambient
+				transformation t;
+				if(elem -> FloatAttribute("diffR"))
+					transformation t (std::make_tuple('C', elem -> FloatAttribute("diffR"), elem -> FloatAttribute("diffG"), elem -> FloatAttribute("diffB"), 0));
+				if(elem -> FloatAttribute("specR"))
+					transformation t (std::make_tuple('C', elem -> FloatAttribute("specR"), elem -> FloatAttribute("specG"), elem -> FloatAttribute("specB"), 1));
+				if(elem -> FloatAttribute("emiR"))
+					transformation t (std::make_tuple('C', elem -> FloatAttribute("emiR"), elem -> FloatAttribute("emiG"), elem -> FloatAttribute("emiB"), 2));
+				if(elem -> FloatAttribute("ambR"))
+					transformation t (std::make_tuple('C', elem -> FloatAttribute("ambR"), elem -> FloatAttribute("ambG"), elem -> FloatAttribute("ambB"), 3));
+				
+				curG.trans.push_back(t);
+			
 			}
 		}
 
@@ -270,10 +328,20 @@ void addGroup(XMLElement *group, Group *parent) {
 
 void drawVBOs(std::vector<struct model> models) {
 	for(model m: models){
-		glBindBuffer(GL_ARRAY_BUFFER,buffers[m.indice]);
-		glVertexPointer(3,GL_FLOAT,0,0);
+		glBindTexture(GL_TEXTURE_2D, m.texture);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vertices[m.indice]);
+		glVertexPointer(3, GL_FLOAT, 0, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, normals[m.indice]);
+		glNormalPointer(GL_FLOAT, 0, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, texCoords[m.indice]);
+		glTexCoordPointer(2, GL_FLOAT, 0, 0);
 
 		glDrawArrays(GL_TRIANGLES, 0, m.numVertices);
+
+		glBindTexture(GL_TEXTURE_2D, 0);	
 	}
 }
 
@@ -281,8 +349,7 @@ void drawGroup(Group g) {
 
 	glPushMatrix();
 
-	float R, G, B;
-	bool color = false;
+	float R, G, B, tipo;
 	float a, x, y, z, time;
 	int rots = 0;	
 
@@ -314,11 +381,22 @@ void drawGroup(Group g) {
 				break;
 
 			case 'C':
+				{
 				if(std::get<1>(tr) != 0 || std::get<2>(tr) != 0 || std::get<3>(tr) != 0) {
 					R = std::get<1>(tr);
 					G = std::get<2>(tr);
 					B = std::get<3>(tr);
-					color = true;
+					tipo = std::get<4>(tr);
+					float cor[4] = {R, G, B, 1.0};
+					if(tipo == 0)
+						glMaterialfv(GL_FRONT, GL_DIFFUSE, cor);
+					if(tipo == 1)
+						glMaterialfv(GL_FRONT, GL_SPECULAR, cor);
+					if(tipo == 2)
+						glMaterialfv(GL_FRONT, GL_EMISSION, cor);
+					if(tipo == 3)
+						glMaterialfv(GL_FRONT, GL_AMBIENT, cor);
+					}
 				}
 				break;
 
@@ -347,14 +425,6 @@ void drawGroup(Group g) {
 		glMultMatrixf((float *)mr);
 	}
 
-	// Vertices
-	if (!color) {
-		glColor3f(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX);
-	} else {
-		float var = rand() / (float) RAND_MAX / 5;
-		glColor3f(R, G, B);
-	}
-
     drawVBOs(g.models);
 
 
@@ -378,8 +448,14 @@ void drawVertices() {
 
 void fillVBOs(Group g) {
 	for(auto m: g.models) {
-		glBindBuffer(GL_ARRAY_BUFFER, buffers[m.indice]);
+		glBindBuffer(GL_ARRAY_BUFFER, vertices[m.indice]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m.numVertices * 3, m.vertices.data(), GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, normals[m.indice]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m.numVertices * 3, m.normals.data(), GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, texCoords[m.indice]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m.numVertices * 2, m.texCoords.data(), GL_STATIC_DRAW);
 
 		for(auto sg: g.subGroups) {
 			fillVBOs(sg);
@@ -490,7 +566,8 @@ void processSpecialKeys(int key, int xx, int yy) {
 int main(int argc, char **argv) {
 	XMLDocument doc;
     XMLError e;
-    XMLElement *scene, *group;
+    XMLElement *scene, *group, *lights, *light;
+	int numLights = 0;
 
     if(argc != 2) {
         std::cout << "Forneça um ficheiro XLM\n";
@@ -510,6 +587,36 @@ int main(int argc, char **argv) {
         std::cout << "Formato inválido\n";
         exit(EXIT_FAILURE);
     }
+
+	// Luz
+	lights = scene -> FirstChildElement("lights");
+	light = lights -> FirstChildElement("light");
+	for(; light != nullptr; light = light -> NextSiblingElement("light")) {
+		const char *tipo = light -> Attribute("type");
+		float X = light -> FloatAttribute("posX");
+		float Y = light -> FloatAttribute("posY");
+		float Z = light -> FloatAttribute("posZ");
+		float t;
+
+		if(strcmp(tipo, "POINT"))
+			t = 1;
+		if(strcmp(tipo, "DIRECTIONAL"))
+			t = 0;
+		if(strcmp(tipo, "SPOT"))
+			t = -1;
+		
+
+		float pos[4] = {X, Y, Z, t};
+
+		// (int)16384 = GL_LIGHT0
+		glLightfv(16384 + numLights, GL_POSITION, pos);
+		numLights++;
+	}
+
+	while(numLights != 0) {
+		glEnable(16384 + (numLights - 1));
+		numLights--;
+	}
 
     // Iterar pelos atributos group e adicioná-las a allGroups
     group = scene -> FirstChildElement("group");
@@ -537,12 +644,21 @@ int main(int argc, char **argv) {
 	//  OpenGL settings
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-
-	//Buffers
-	buffers = (GLuint *)malloc(numModels * sizeof(GLuint));
+	glEnable(GL_LIGHTING);
+	glEnable(GL_TEXTURE_2D);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glGenBuffers(numModels, buffers);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	//Buffers
+	vertices = (GLuint *)malloc(numModels * sizeof(GLuint));
+	normals = (GLuint *)malloc(numModels * sizeof(GLuint));
+	texCoords = (GLuint *)malloc(numModels * sizeof(GLuint));
+
+	glGenBuffers(numModels, vertices);
+	glGenBuffers(numModels, normals);
+	glGenBuffers(numModels, texCoords);
 
 	for(Group g: allGroups) {
 		fillVBOs(g);
