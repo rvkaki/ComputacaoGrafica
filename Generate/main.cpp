@@ -12,6 +12,11 @@ using namespace std;
 
 ofstream f; 
 
+struct p_2d {
+	float x;
+	float y;
+};
+
 struct CP {
 	float x;
 	float y;
@@ -48,6 +53,17 @@ void drawVertex(float x, float y, float z) {
 
 void drawVertexA(float *p){
 	f << p[0] << " " << p[1] << " " << p[2] << "\n";
+}
+
+void drawPoints2D(std::vector<p_2d> texturas) {
+	for(int i = 0; i < texturas.size(); i++) {
+		f << texturas.at(i).x << " " << texturas.at(i).y << "\n";
+	}
+}
+
+p_2d make_ponto(float x, float y) {
+	p_2d ponto = {x, y};
+	return ponto;
 }
 
 void drawPlane(float x, float z) {
@@ -206,6 +222,8 @@ void drawCone(float radius, float height, int slices, int stacks) {
 	float h = height/((float)stacks);
 	float nr, nh;
 
+	std::vector<p_2d> texturas;
+
 	for (int i = 0; i < slices; i++) {
 		drawVertex(0,0,0);
 		drawVertex(0, -1, 0);
@@ -261,16 +279,19 @@ void drawCone(float radius, float height, int slices, int stacks) {
 		nr -= r;
 	}
 
-	f << "TEXTURA:";
+	f << "TEXTURA:\n";
 
-	//fazer as coordenadas de textura
+	drawPoints2D(texturas);
 }
 
 void drawSphere(int radius, int slices, int stacks) {	
-	double sl = 2 * M_PI / slices;
+	double sl = (2.0 * M_PI) / slices;
 	double beta = M_PI_2 / (stacks / 2);
 	float nr, h, nh;
 	float r = radius;
+	std::vector<p_2d> texturas;
+	float st = M_PI / stacks;
+	float tex_offset = 0.5;
 
 	for(int i = 0; i < (((float)stacks)/2); i++) {
 		nr = radius * cos(beta*(i+1));
@@ -281,8 +302,11 @@ void drawSphere(int radius, int slices, int stacks) {
 		for(float j = 0; j < slices; j++) {
 			//Triangulos voltados para cima - metade superior
 			p1[0] = r * sin(j*sl); p1[1] = h; p1[2] = r * cos(j*sl);
+			texturas.push_back(make_ponto(j*sl / (2.0 * M_PI), tex_offset + i*st / M_PI));
 			p2[0] = r * sin((j+1)*sl); p2[1] = h; p2[2] = r * cos((j+1)*sl);
+			texturas.push_back(make_ponto((j+1)*sl / (2.0 * M_PI), tex_offset + i*st / M_PI));
 			p3[0] = nr * sin((j+1)*sl); p3[1] = nh; p3[2] = nr * cos((j+1)*sl);
+			texturas.push_back(make_ponto((j+1)*sl / (2.0 * M_PI), tex_offset + (i+1)*st / M_PI));
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));
@@ -293,8 +317,11 @@ void drawSphere(int radius, int slices, int stacks) {
 		
 			// Triangulos voltados para cima - metade inferior
 			p1[0] = r * sin(j*sl); p1[1] = -h; p1[2] = r * cos(j*sl);
+			texturas.push_back(make_ponto(j*sl / (2.0 * M_PI), tex_offset - i*st / M_PI));
 			p2[0] = nr * sin(j*sl); p2[1] = -nh; p2[2] = nr * cos(j*sl);
+			texturas.push_back(make_ponto(j*sl / (2.0 * M_PI), tex_offset - (i+1)*st / M_PI));
 			p3[0] = r * sin((j+1)*sl); p3[1] = -h; p3[2] = r * cos((j+1)*sl);
+			texturas.push_back(make_ponto((j+1)*sl / (2.0 * M_PI), tex_offset - i*st / M_PI));
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));
@@ -306,8 +333,11 @@ void drawSphere(int radius, int slices, int stacks) {
 			//j += 0.5;
 			// Triangulos voltados para baixo - metade superior
 			p1[0] = nr * sin((j+1)*sl); p1[1] = nh; p1[2] = nr * cos((j+1)*sl);
+			texturas.push_back(make_ponto((j+1)*sl / (2.0 * M_PI), tex_offset + (i+1)*st / M_PI));
 			p2[0] = nr * sin(j*sl); p2[1] = nh; p2[2] = nr * cos(j*sl);
+			texturas.push_back(make_ponto(j*sl / (2.0 * M_PI), tex_offset + (i+1)*st / M_PI));
 			p3[0] = r * sin(j*sl); p3[1] = h; p3[2] = r * cos(j*sl);
+			texturas.push_back(make_ponto(j*sl / (2.0 * M_PI), tex_offset + i*st / M_PI));
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));
@@ -318,8 +348,11 @@ void drawSphere(int radius, int slices, int stacks) {
 
 			// Triangulos voltados para baixo - metade inferior
 			p1[0] = nr * sin((j+1)*sl); p1[1] = -nh; p1[2] = nr * cos((j+1)*sl);
+			texturas.push_back(make_ponto((j+1)*sl / (2.0 * M_PI), tex_offset - (i+1)*st / M_PI));
 			p2[0] = r * sin((j+1)*sl); p2[1] = -h; p2[2] = r*cos((j+1)*sl);
+			texturas.push_back(make_ponto((j+1)*sl / (2.0 * M_PI), tex_offset - i*st / M_PI));
 			p3[0] = nr * sin(j*sl); p3[1] = -nh; p3[2] = nr*cos(j*sl);
+			texturas.push_back(make_ponto(j*sl / (2.0 * M_PI), tex_offset - (i+1)*st / M_PI));
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));
@@ -332,7 +365,9 @@ void drawSphere(int radius, int slices, int stacks) {
 		r = nr;
 	}
 
-	f << "TEXTURA:";
+	f << "TEXTURA:\n";
+
+	drawPoints2D(texturas);
 }
 
 float* multMatrixVector(float *m, float *v, float *res) {

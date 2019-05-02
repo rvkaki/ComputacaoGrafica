@@ -31,7 +31,7 @@ if (NOT WIN32)
 
 	find_package(DevIL REQUIRED)
 	link_libraries(${IL_LIBRARIES} )
-	include_directories(ยง{IL_INCLUDE_DIR})
+	include_directories(${IL_INCLUDE_DIR})
 endif(NOT WIN32)	
 	
 find_package(OpenGL REQUIRED)
@@ -40,6 +40,17 @@ link_directories(${OpenGL_LIBRARY_DIRS})
 add_definitions(${OpenGL_DEFINITIONS})
 
 add_executable(${PROJECT_NAME} main.cpp tinyxml2.o)
+
+file(COPY ${CMAKE_SOURCE_DIR}/../Texturas/2k_sun.jpg DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/../Texturas/2k_mercury.jpg DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/../Texturas/2k_venus_surface.jpg DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/../Texturas/2k_earth_daymap.jpg DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/../Texturas/2k_moon.jpg DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/../Texturas/2k_mars.jpg DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/../Texturas/2k_jupiter.jpg DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/../Texturas/2k_neptune.jpg DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/../Texturas/2k_uranus.jpg DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/../Texturas/2k_saturn.jpg DESTINATION ${CMAKE_BINARY_DIR})
 
 if (WIN32)
 	target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} glut32 glew32 DevIL)
