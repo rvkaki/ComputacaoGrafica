@@ -35,7 +35,7 @@ float* normalize(float *a) {
 
 float* getVector(float *a, float *b) {
 	float *res = (float *) malloc(sizeof(float) * 3);
-	
+
 	res[0] = b[0]-a[0];
 	res[1] = b[1]-a[1];
 	res[2] = b[2]-a[2];
@@ -208,11 +208,11 @@ void drawCone(float radius, float height, int slices, int stacks) {
 
 	for (int i = 0; i < slices; i++) {
 		drawVertex(0,0,0);
-		drawVertex(0, -1, 0);
+		//drawVertex(0, -1, 0);
 		drawVertex(radius * sin((i+1) * sl), 0, radius * cos((i+1) * sl));
-		drawVertex(0, -1, 0);
+		//drawVertex(0, -1, 0);
 		drawVertex(radius * sin(i*sl), 0, radius * cos(i*sl));
-		drawVertex(0, -1, 0);
+		//drawVertex(0, -1, 0);
 	}
 
 	nr = radius - r;
@@ -230,14 +230,14 @@ void drawCone(float radius, float height, int slices, int stacks) {
 			p3[0] = nr * sin((j + 0.5) * sl); p3[1] = nh; p3[2] = nr * cos((j + 0.5) * sl);
 			
 			drawVertexA(p1);
-			p1[1] = h;
-			drawVertexA(normalize(p1));
+			//p1[1] = h;
+			//drawVertexA(normalize(p1));
 			drawVertexA(p2);
-			p2[1] = h;
-			drawVertexA(normalize(p2));
+			//p2[1] = h;
+			//drawVertexA(normalize(p2));
 			drawVertexA(p3);
-			p3[1] = h;
-			drawVertexA(normalize(p3));
+			//p3[1] = h;
+			//drawVertexA(normalize(p3));
 
 			j += 0.5;
 			// Triangulos virados para baixo
@@ -246,14 +246,14 @@ void drawCone(float radius, float height, int slices, int stacks) {
 			p3[0] = radius * sin((j + 0.5) * sl); p3[1] = height; p3[2] = radius * cos((j + 0.5) * sl);
 
 			drawVertexA(p1);
-			p1[1] = h;
-			drawVertexA(normalize(p1));
+			//p1[1] = h;
+			//drawVertexA(normalize(p1));
 			drawVertexA(p2);
-			p2[1] = h;
-			drawVertexA(normalize(p2));
+			//p2[1] = h;
+			//drawVertexA(normalize(p2));
 			drawVertexA(p3);
-			p3[1] = h;
-			drawVertexA(normalize(p3));
+			//p3[1] = h;
+			//drawVertexA(normalize(p3));
 
 			j -= 0.5;
 		}
@@ -261,7 +261,7 @@ void drawCone(float radius, float height, int slices, int stacks) {
 		nr -= r;
 	}
 
-	f << "TEXTURA:";
+	//f << "TEXTURA:";
 
 	//fazer as coordenadas de textura
 }
@@ -294,7 +294,7 @@ void drawSphere(int radius, int slices, int stacks) {
 			// Triangulos voltados para cima - metade inferior
 			p1[0] = r * sin(j*sl); p1[1] = -h; p1[2] = r * cos(j*sl);
 			p2[0] = nr * sin((j+0.5)*sl); p2[1] = -nh; p2[2] = nr * cos((j+0.5)*sl);
-			p3[0] = r * sin((j+1)*sl); p3[1] = h; p3[2] = r * cos((j+1)*sl);
+			p3[0] = r * sin((j+1)*sl); p3[1] = -h; p3[2] = r * cos((j+1)*sl);
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));

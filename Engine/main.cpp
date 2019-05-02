@@ -13,7 +13,8 @@
 using namespace tinyxml2;
 
 int numModels = 0;
-GLuint *vertices, *normals, *texCoords;
+GLuint *vertices, *normals;
+//, *texCoords;
 
 int total = 0;
 
@@ -39,7 +40,7 @@ struct model {
 	int texture;
 	std::vector<vertice> vertices;
 	std::vector<vertice> normals;
-	std::vector<vertice> texCoords;
+	//std::vector<vertice> texCoords;
 } Model;
 
 typedef struct group {
@@ -204,9 +205,9 @@ model addVertices(std::ifstream &vertices) {
 		numVertices++;
     }
 
-	while (vertices.getline(x, 100)) {
+	/*while (vertices.getline(x, 100)) {
 		md.texCoords.push_back(extractVertice(x));
-	}
+	}*/
 
 	md.indice = numModels;
 	md.numVertices = numVertices;
@@ -294,22 +295,26 @@ void addGroup(XMLElement *group, Group *parent) {
 				curG.models.push_back(addVertices(f));
 				f.close();
 
-				curG.models.at(numModels).texture = loadTexture(model->Attribute("texture"));
+				//curG.models.at(numModels).texture = loadTexture(model->Attribute("texture"));
 				numModels++;
 			
 				// COLOR !! ultimo elemento: 0 -> diffuse, 1 -> specular, 2 -> emissive, 3 -> ambient
-				transformation t;
-				if(elem -> FloatAttribute("diffR"))
-					transformation t (std::make_tuple('C', elem -> FloatAttribute("diffR"), elem -> FloatAttribute("diffG"), elem -> FloatAttribute("diffB"), 0));
-				if(elem -> FloatAttribute("specR"))
-					transformation t (std::make_tuple('C', elem -> FloatAttribute("specR"), elem -> FloatAttribute("specG"), elem -> FloatAttribute("specB"), 1));
-				if(elem -> FloatAttribute("emiR"))
-					transformation t (std::make_tuple('C', elem -> FloatAttribute("emiR"), elem -> FloatAttribute("emiG"), elem -> FloatAttribute("emiB"), 2));
-				if(elem -> FloatAttribute("ambR"))
-					transformation t (std::make_tuple('C', elem -> FloatAttribute("ambR"), elem -> FloatAttribute("ambG"), elem -> FloatAttribute("ambB"), 3));
-				
-				curG.trans.push_back(t);
-			
+				if(model -> FloatAttribute("diffR")) {
+					transformation t (std::make_tuple('C', model -> FloatAttribute("diffR"), model -> FloatAttribute("diffG"), model -> FloatAttribute("diffB"), 0));
+					curG.trans.push_back(t);
+				}
+				if(model -> FloatAttribute("specR")) {
+					transformation t (std::make_tuple('C', model -> FloatAttribute("specR"), model -> FloatAttribute("specG"), model -> FloatAttribute("specB"), 1));
+					curG.trans.push_back(t);
+				}
+				if(model -> FloatAttribute("emiR")) {
+					transformation t (std::make_tuple('C', model -> FloatAttribute("emiR"), model -> FloatAttribute("emiG"), model -> FloatAttribute("emiB"), 2));
+					curG.trans.push_back(t);
+				}
+				if(model -> FloatAttribute("ambR")) {
+					transformation t (std::make_tuple('C', model -> FloatAttribute("ambR"), model -> FloatAttribute("ambG"), model -> FloatAttribute("ambB"), 3));
+					curG.trans.push_back(t);
+				}
 			}
 		}
 
@@ -328,7 +333,7 @@ void addGroup(XMLElement *group, Group *parent) {
 
 void drawVBOs(std::vector<struct model> models) {
 	for(model m: models){
-		glBindTexture(GL_TEXTURE_2D, m.texture);
+		//glBindTexture(GL_TEXTURE_2D, m.texture);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vertices[m.indice]);
 		glVertexPointer(3, GL_FLOAT, 0, 0);
@@ -336,12 +341,12 @@ void drawVBOs(std::vector<struct model> models) {
 		glBindBuffer(GL_ARRAY_BUFFER, normals[m.indice]);
 		glNormalPointer(GL_FLOAT, 0, 0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, texCoords[m.indice]);
-		glTexCoordPointer(2, GL_FLOAT, 0, 0);
+		//glBindBuffer(GL_ARRAY_BUFFER, texCoords[m.indice]);
+		//glTexCoordPointer(2, GL_FLOAT, 0, 0);
 
 		glDrawArrays(GL_TRIANGLES, 0, m.numVertices);
 
-		glBindTexture(GL_TEXTURE_2D, 0);	
+		//glBindTexture(GL_TEXTURE_2D, 0);	
 	}
 }
 
@@ -382,7 +387,6 @@ void drawGroup(Group g) {
 
 			case 'C':
 				{
-				if(std::get<1>(tr) != 0 || std::get<2>(tr) != 0 || std::get<3>(tr) != 0) {
 					R = std::get<1>(tr);
 					G = std::get<2>(tr);
 					B = std::get<3>(tr);
@@ -396,7 +400,7 @@ void drawGroup(Group g) {
 						glMaterialfv(GL_FRONT, GL_EMISSION, cor);
 					if(tipo == 3)
 						glMaterialfv(GL_FRONT, GL_AMBIENT, cor);
-					}
+				
 				}
 				break;
 
@@ -454,8 +458,8 @@ void fillVBOs(Group g) {
 		glBindBuffer(GL_ARRAY_BUFFER, normals[m.indice]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m.numVertices * 3, m.normals.data(), GL_STATIC_DRAW);
 
-		glBindBuffer(GL_ARRAY_BUFFER, texCoords[m.indice]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m.numVertices * 2, m.texCoords.data(), GL_STATIC_DRAW);
+		//glBindBuffer(GL_ARRAY_BUFFER, texCoords[m.indice]);
+		//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m.numVertices * 2, m.texCoords.data(), GL_STATIC_DRAW);
 
 		for(auto sg: g.subGroups) {
 			fillVBOs(sg);
@@ -474,8 +478,23 @@ void renderScene() {
 		0.0, 0.0, 0.0,
 		0.0f, 1.0f, 0.0f);
 
+	float pos[4] = {0, 0, -10, 0};
+	float pos1[4] = {0, 0, 0, 0};
+	float pos2[4] = {0, 10, 0, 0};
+	float pos3[4] = {0, -10, 0, 0};
+	float pos4[4] = {10, 0, 0, 0};
+	float pos5[4] = {-10, 0, 0, 0};
+	float pos6[4] = {0, 0, 10, 0};
 
-	glColor3f(1,0,0);
+	glLightfv(GL_LIGHT0, GL_POSITION, pos);
+	glLightfv(GL_LIGHT1, GL_POSITION, pos1);
+	glLightfv(GL_LIGHT2, GL_POSITION, pos2);
+	glLightfv(GL_LIGHT3, GL_POSITION, pos3);
+	glLightfv(GL_LIGHT4, GL_POSITION, pos4);
+	glLightfv(GL_LIGHT5, GL_POSITION, pos5);
+	glLightfv(GL_LIGHT6, GL_POSITION, pos6);
+
+
 	drawVertices();
 
 	// End of frame
@@ -588,7 +607,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-	// Luz
+/*	// Luz
 	lights = scene -> FirstChildElement("lights");
 	light = lights -> FirstChildElement("light");
 	for(; light != nullptr; light = light -> NextSiblingElement("light")) {
@@ -598,25 +617,23 @@ int main(int argc, char **argv) {
 		float Z = light -> FloatAttribute("posZ");
 		float t;
 
-		if(strcmp(tipo, "POINT"))
+		if(strcmp(tipo, "POINT") == 0)
 			t = 1;
-		if(strcmp(tipo, "DIRECTIONAL"))
+		if(strcmp(tipo, "DIRECTIONAL") == 0)
 			t = 0;
-		if(strcmp(tipo, "SPOT"))
+		if(strcmp(tipo, "SPOT") == 0) 
 			t = -1;
-		
 
 		float pos[4] = {X, Y, Z, t};
 
 		// (int)16384 = GL_LIGHT0
-		glLightfv(16384 + numLights, GL_POSITION, pos);
+		glLightfv(GL_LIGHT0, GL_POSITION, pos);
 		numLights++;
 	}
 
-	while(numLights != 0) {
-		glEnable(16384 + (numLights - 1));
-		numLights--;
-	}
+	for (int i = 0; i < numLights; i++) {
+		glEnable(GL_LIGHT0);
+	}*/
 
     // Iterar pelos atributos group e adicioná-las a allGroups
     group = scene -> FirstChildElement("group");
@@ -645,20 +662,46 @@ int main(int argc, char **argv) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_LIGHTING);
-	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHT2);
+	glEnable(GL_LIGHT3);
+	glEnable(GL_LIGHT4);
+	glEnable(GL_LIGHT5);
+	glEnable(GL_LIGHT6);
+	//glEnable(GL_TEXTURE_2D);
+
+	float amb[4] = {0, 0, 0, 1};
+	glLightfv(GL_LIGHT0, GL_AMBIENT, amb);
+	glLightfv(GL_LIGHT1, GL_AMBIENT, amb);
+	glLightfv(GL_LIGHT2, GL_AMBIENT, amb);
+	glLightfv(GL_LIGHT3, GL_AMBIENT, amb);
+	glLightfv(GL_LIGHT4, GL_AMBIENT, amb);
+	glLightfv(GL_LIGHT5, GL_AMBIENT, amb);
+	glLightfv(GL_LIGHT6, GL_AMBIENT, amb);
+
+	float diff[4] = {1, 1, 1, 1};
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, diff);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, diff);
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, diff);
+	glLightfv(GL_LIGHT4, GL_DIFFUSE, diff);
+	glLightfv(GL_LIGHT5, GL_DIFFUSE, diff);
+	glLightfv(GL_LIGHT6, GL_DIFFUSE, diff);
+
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	//Buffers
 	vertices = (GLuint *)malloc(numModels * sizeof(GLuint));
 	normals = (GLuint *)malloc(numModels * sizeof(GLuint));
-	texCoords = (GLuint *)malloc(numModels * sizeof(GLuint));
+	//texCoords = (GLuint *)malloc(numModels * sizeof(GLuint));
 
 	glGenBuffers(numModels, vertices);
 	glGenBuffers(numModels, normals);
-	glGenBuffers(numModels, texCoords);
+	//glGenBuffers(numModels, texCoords);
 
 	for(Group g: allGroups) {
 		fillVBOs(g);
