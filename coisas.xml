@@ -1,9 +1,9 @@
 <scene>
     <lights>
-        <light type="POINT" posX="0" posY="30" posZ="0" />
-        <light type="POINT" posX="0" posY="-30" posZ="0" />
-        <light type="POINT" posX="-30" posY="0" posZ="0" />
-        <light type="POINT" posX="30" posY="0" posZ="0" />
+        <light type="POINT" posX="0" posY="15" posZ="0" />
+        <light type="POINT" posX="0" posY="-15" posZ="0" />
+        <light type="POINT" posX="-15" posY="0" posZ="0" />
+        <light type="POINT" posX="15" posY="0" posZ="0" />
     </lights>
     <group>
         <rotate time="27" X="0" Y="1" Z="0"/>

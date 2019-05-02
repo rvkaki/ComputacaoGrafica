@@ -208,11 +208,11 @@ void drawCone(float radius, float height, int slices, int stacks) {
 
 	for (int i = 0; i < slices; i++) {
 		drawVertex(0,0,0);
-		//drawVertex(0, -1, 0);
+		drawVertex(0, -1, 0);
 		drawVertex(radius * sin((i+1) * sl), 0, radius * cos((i+1) * sl));
-		//drawVertex(0, -1, 0);
+		drawVertex(0, -1, 0);
 		drawVertex(radius * sin(i*sl), 0, radius * cos(i*sl));
-		//drawVertex(0, -1, 0);
+		drawVertex(0, -1, 0);
 	}
 
 	nr = radius - r;
@@ -221,47 +221,47 @@ void drawCone(float radius, float height, int slices, int stacks) {
 		nh = (i+1) * h;
 		float p1[3], p2[3], p3[3];
 
-		for(float j = 0.5*(i%2); j < slices + 0.5*(i%2); j++)
+		for(float j = 0; j < slices; j++)
 		{
 			// Triangulas virados para cima
 			float *res1, *res2, *res3;
 			p1[0] = radius * sin(j*sl); p1[1] = height; p1[2] = radius * cos(j*sl);
 			p2[0] = radius * sin((j+1)*sl); p2[1] = height; p2[2] = radius * cos((j+1)*sl);
-			p3[0] = nr * sin((j + 0.5) * sl); p3[1] = nh; p3[2] = nr * cos((j + 0.5) * sl);
+			p3[0] = nr * sin((j + 1) * sl); p3[1] = nh; p3[2] = nr * cos((j + 1) * sl);
 			
 			drawVertexA(p1);
-			//p1[1] = h;
-			//drawVertexA(normalize(p1));
+			p1[1] = h;
+			drawVertexA(normalize(p1));
 			drawVertexA(p2);
-			//p2[1] = h;
-			//drawVertexA(normalize(p2));
+			p2[1] = h;
+			drawVertexA(normalize(p2));
 			drawVertexA(p3);
-			//p3[1] = h;
-			//drawVertexA(normalize(p3));
+			p3[1] = h;
+			drawVertexA(normalize(p3));
 
-			j += 0.5;
+			//j += 0.5;
 			// Triangulos virados para baixo
 			p1[0] = nr * sin((j+1)*sl);  p1[1] = nh; p1[2] = nr * cos((j+1)*sl);
 			p2[0] = nr*sin(j*sl); p2[1] = nh; p2[2] = nr*cos(j*sl);
-			p3[0] = radius * sin((j + 0.5) * sl); p3[1] = height; p3[2] = radius * cos((j + 0.5) * sl);
+			p3[0] = radius * sin(j * sl); p3[1] = height; p3[2] = radius * cos(j * sl);
 
 			drawVertexA(p1);
-			//p1[1] = h;
-			//drawVertexA(normalize(p1));
+			p1[1] = h;
+			drawVertexA(normalize(p1));
 			drawVertexA(p2);
-			//p2[1] = h;
-			//drawVertexA(normalize(p2));
+			p2[1] = h;
+			drawVertexA(normalize(p2));
 			drawVertexA(p3);
-			//p3[1] = h;
-			//drawVertexA(normalize(p3));
+			p3[1] = h;
+			drawVertexA(normalize(p3));
 
-			j -= 0.5;
+			//j -= 0.5;
 		}
 		radius = nr;
 		nr -= r;
 	}
 
-	//f << "TEXTURA:";
+	f << "TEXTURA:";
 
 	//fazer as coordenadas de textura
 }
@@ -278,11 +278,11 @@ void drawSphere(int radius, int slices, int stacks) {
 		nh = radius * sin(beta*(i+1));
 		float p1[3], p2[3], p3[3];
 
-		for(float j = 0.5 * (i%2); j < slices + 0.5*(i%2); j++) {
+		for(float j = 0; j < slices; j++) {
 			//Triangulos voltados para cima - metade superior
 			p1[0] = r * sin(j*sl); p1[1] = h; p1[2] = r * cos(j*sl);
 			p2[0] = r * sin((j+1)*sl); p2[1] = h; p2[2] = r * cos((j+1)*sl);
-			p3[0] = nr * sin((j+0.5)*sl); p3[1] = nh; p3[2] = nr * cos((j+0.5)*sl);
+			p3[0] = nr * sin((j+1)*sl); p3[1] = nh; p3[2] = nr * cos((j+1)*sl);
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));
@@ -293,7 +293,7 @@ void drawSphere(int radius, int slices, int stacks) {
 		
 			// Triangulos voltados para cima - metade inferior
 			p1[0] = r * sin(j*sl); p1[1] = -h; p1[2] = r * cos(j*sl);
-			p2[0] = nr * sin((j+0.5)*sl); p2[1] = -nh; p2[2] = nr * cos((j+0.5)*sl);
+			p2[0] = nr * sin(j*sl); p2[1] = -nh; p2[2] = nr * cos(j*sl);
 			p3[0] = r * sin((j+1)*sl); p3[1] = -h; p3[2] = r * cos((j+1)*sl);
 
 			drawVertexA(p1);
@@ -303,11 +303,11 @@ void drawSphere(int radius, int slices, int stacks) {
 			drawVertexA(p3);
 			drawVertexA(normalize(p3));
 
-			j += 0.5;
+			//j += 0.5;
 			// Triangulos voltados para baixo - metade superior
 			p1[0] = nr * sin((j+1)*sl); p1[1] = nh; p1[2] = nr * cos((j+1)*sl);
 			p2[0] = nr * sin(j*sl); p2[1] = nh; p2[2] = nr * cos(j*sl);
-			p3[0] = r * sin((j+0.5)*sl); p3[1] = h; p3[2] = r * cos((j+0.5)*sl);
+			p3[0] = r * sin(j*sl); p3[1] = h; p3[2] = r * cos(j*sl);
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));
@@ -318,7 +318,7 @@ void drawSphere(int radius, int slices, int stacks) {
 
 			// Triangulos voltados para baixo - metade inferior
 			p1[0] = nr * sin((j+1)*sl); p1[1] = -nh; p1[2] = nr * cos((j+1)*sl);
-			p2[0] = r * sin((j+0.5)*sl); p2[1] = -h; p2[2] = r*cos((j+0.5)*sl);
+			p2[0] = r * sin((j+1)*sl); p2[1] = -h; p2[2] = r*cos((j+1)*sl);
 			p3[0] = nr * sin(j*sl); p3[1] = -nh; p3[2] = nr*cos(j*sl);
 
 			drawVertexA(p1);
@@ -327,7 +327,7 @@ void drawSphere(int radius, int slices, int stacks) {
 			drawVertexA(normalize(p2));
 			drawVertexA(p3);
 			drawVertexA(normalize(p3));
-			j -= 0.5;
+			//j -= 0.5;
 		}
 		r = nr;
 	}

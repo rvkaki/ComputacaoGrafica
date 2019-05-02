@@ -474,16 +474,17 @@ void renderScene() {
 	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 	// set the camera
 	glLoadIdentity();
 	gluLookAt(dist*cos(beta)*sin(alpha), dist*sin(beta), dist*cos(beta)*cos(alpha),
 		0.0, 0.0, 0.0,
 		0.0f, 1.0f, 0.0f);
 
-	glLightfv(GL_LIGHT0, GL_POSITION, luzes.at(0));
+	/*glLightfv(GL_LIGHT0, GL_POSITION, luzes.at(0));
 	glLightfv(GL_LIGHT1, GL_POSITION, luzes.at(1));
 	glLightfv(GL_LIGHT2, GL_POSITION, luzes.at(2));
-	glLightfv(GL_LIGHT3, GL_POSITION, luzes.at(3));
+	glLightfv(GL_LIGHT3, GL_POSITION, luzes.at(3));*/
 
 	drawVertices();
 
@@ -651,6 +652,10 @@ int main(int argc, char **argv) {
 		glEnable(GL_LIGHT1);
 		glEnable(GL_LIGHT2);
 		glEnable(GL_LIGHT3);
+		glLightfv(GL_LIGHT0, GL_POSITION, luzes.at(0));
+		glLightfv(GL_LIGHT1, GL_POSITION, luzes.at(1));
+		glLightfv(GL_LIGHT2, GL_POSITION, luzes.at(2));
+		glLightfv(GL_LIGHT3, GL_POSITION, luzes.at(3));
 		glLightfv(GL_LIGHT0, GL_AMBIENT, amb);
 		glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
 		glLightfv(GL_LIGHT1, GL_AMBIENT, amb);
