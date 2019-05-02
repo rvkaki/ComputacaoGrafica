@@ -25,7 +25,7 @@ void cross(float *a, float *b, float *res) {
 }
 
 float* normalize(float *a) {
-	float b[3];
+	float *b = (float *) malloc(sizeof(float) * 3);
 	float l = sqrt(a[0]*a[0] + a[1] * a[1] + a[2] * a[2]);
 	b[0] = a[0]/l;
 	b[1] = a[1]/l;
@@ -34,7 +34,7 @@ float* normalize(float *a) {
 }
 
 float* getVector(float *a, float *b) {
-	float res[3];
+	float *res = (float *) malloc(sizeof(float) * 3);
 	
 	res[0] = b[0]-a[0];
 	res[1] = b[1]-a[1];
@@ -219,14 +219,15 @@ void drawCone(float radius, float height, int slices, int stacks) {
 	for (int i = 0; i < stacks; i++) {
 		height = i * h;
 		nh = (i+1) * h;
+		float p1[3], p2[3], p3[3];
 
 		for(float j = 0.5*(i%2); j < slices + 0.5*(i%2); j++)
 		{
 			// Triangulas virados para cima
 			float *res1, *res2, *res3;
-			float p1[3] = {radius * sin(j*sl), height, radius * cos(j*sl)};
-			float p2[3] = {radius * sin((j+1)*sl), height, radius * cos((j+1)*sl)};
-			float p3[3] = {nr * sin((j + 0.5) * sl), nh, nr * cos((j + 0.5) * sl)};
+			p1[0] = radius * sin(j*sl); p1[1] = height; p1[2] = radius * cos(j*sl);
+			p2[0] = radius * sin((j+1)*sl); p2[1] = height; p2[2] = radius * cos((j+1)*sl);
+			p3[0] = nr * sin((j + 0.5) * sl); p3[1] = nh; p3[2] = nr * cos((j + 0.5) * sl);
 			
 			drawVertexA(p1);
 			p1[1] = h;
@@ -240,9 +241,9 @@ void drawCone(float radius, float height, int slices, int stacks) {
 
 			j += 0.5;
 			// Triangulos virados para baixo
-			float p1[3] = {nr * sin((j+1)*sl), nh, nr * cos((j+1)*sl)};
-			float p2[3] = {nr*sin(j*sl), nh, nr*cos(j*sl)};
-			float p3[3] = {radius * sin((j + 0.5) * sl), height, radius * cos((j + 0.5) * sl)};
+			p1[0] = nr * sin((j+1)*sl);  p1[1] = nh; p1[2] = nr * cos((j+1)*sl);
+			p2[0] = nr*sin(j*sl); p2[1] = nh; p2[2] = nr*cos(j*sl);
+			p3[0] = radius * sin((j + 0.5) * sl); p3[1] = height; p3[2] = radius * cos((j + 0.5) * sl);
 
 			drawVertexA(p1);
 			p1[1] = h;
@@ -275,12 +276,13 @@ void drawSphere(int radius, int slices, int stacks) {
 		nr = radius * cos(beta*(i+1));
 		h = radius * sin(beta*i);
 		nh = radius * sin(beta*(i+1));
+		float p1[3], p2[3], p3[3];
 
 		for(float j = 0.5 * (i%2); j < slices + 0.5*(i%2); j++) {
 			//Triangulos voltados para cima - metade superior
-			float p1[3] = {r * sin(j*sl), h, r * cos(j*sl)};
-			float p2[3] = {r * sin((j+1)*sl), h, r * cos((j+1)*sl)};
-			float p3[3] = {nr * sin((j+0.5)*sl), nh, nr * cos((j+0.5)*sl)};
+			p1[0] = r * sin(j*sl); p1[1] = h; p1[2] = r * cos(j*sl);
+			p2[0] = r * sin((j+1)*sl); p2[1] = h; p2[2] = r * cos((j+1)*sl);
+			p3[0] = nr * sin((j+0.5)*sl); p3[1] = nh; p3[2] = nr * cos((j+0.5)*sl);
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));
@@ -290,9 +292,9 @@ void drawSphere(int radius, int slices, int stacks) {
 			drawVertexA(normalize(p3));
 		
 			// Triangulos voltados para cima - metade inferior
-			float p1[3] = {r*sin(j*sl), -h, r*cos(j*sl)};
-			float p2[3] = {nr*sin((j+0.5)*sl), -nh, nr*cos((j+0.5)*sl)};
-			float p3[3] = {r*sin((j+1)*sl), -h, r*cos((j+1)*sl)};
+			p1[0] = r * sin(j*sl); p1[1] = -h; p1[2] = r * cos(j*sl);
+			p2[0] = nr * sin((j+0.5)*sl); p2[1] = -nh; p2[2] = nr * cos((j+0.5)*sl);
+			p3[0] = r * sin((j+1)*sl); p3[1] = h; p3[2] = r * cos((j+1)*sl);
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));
@@ -303,9 +305,9 @@ void drawSphere(int radius, int slices, int stacks) {
 
 			j += 0.5;
 			// Triangulos voltados para baixo - metade superior
-			float p1[3] = {nr * sin((j+1)*sl), nh, nr * cos((j+1)*sl)};
-			float p2[3] = {nr * sin(j*sl), nh, nr * cos(j*sl)};
-			float p3[3] = {r * sin((j+0.5)*sl), h, r * cos((j+0.5)*sl)};
+			p1[0] = nr * sin((j+1)*sl); p1[1] = nh; p1[2] = nr * cos((j+1)*sl);
+			p2[0] = nr * sin(j*sl); p2[1] = nh; p2[2] = nr * cos(j*sl);
+			p3[0] = r * sin((j+0.5)*sl); p3[1] = h; p3[2] = r * cos((j+0.5)*sl);
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));
@@ -315,9 +317,9 @@ void drawSphere(int radius, int slices, int stacks) {
 			drawVertexA(normalize(p3));
 
 			// Triangulos voltados para baixo - metade inferior
-			float p1[3] = {nr * sin((j+1)*sl), -nh, nr * cos((j+1)*sl)};
-			float p2[3] = {r * sin((j+0.5)*sl), -h, r*cos((j+0.5)*sl)};
-			float p3[3] = {nr * sin(j*sl), -nh, nr*cos(j*sl)};
+			p1[0] = nr * sin((j+1)*sl); p1[1] = -nh; p1[2] = nr * cos((j+1)*sl);
+			p2[0] = r * sin((j+0.5)*sl); p2[1] = -h; p2[2] = r*cos((j+0.5)*sl);
+			p3[0] = nr * sin(j*sl); p3[1] = -nh; p3[2] = nr*cos(j*sl);
 
 			drawVertexA(p1);
 			drawVertexA(normalize(p1));
