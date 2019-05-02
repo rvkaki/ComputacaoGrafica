@@ -28,6 +28,8 @@ typedef std::vector<vertice> Vertices;
 typedef std::tuple<char, float, float, float, float> transformation;
 typedef std::vector<transformation> Transformations;
 
+std::vector<float*> luzes;
+
 typedef struct curva {
 	int valid;
 	float time;
@@ -478,22 +480,10 @@ void renderScene() {
 		0.0, 0.0, 0.0,
 		0.0f, 1.0f, 0.0f);
 
-	float pos[4] = {0, 0, -10, 0};
-	float pos1[4] = {0, 0, 0, 0};
-	float pos2[4] = {0, 10, 0, 0};
-	float pos3[4] = {0, -10, 0, 0};
-	float pos4[4] = {10, 0, 0, 0};
-	float pos5[4] = {-10, 0, 0, 0};
-	float pos6[4] = {0, 0, 10, 0};
-
-	glLightfv(GL_LIGHT0, GL_POSITION, pos);
-	glLightfv(GL_LIGHT1, GL_POSITION, pos1);
-	glLightfv(GL_LIGHT2, GL_POSITION, pos2);
-	glLightfv(GL_LIGHT3, GL_POSITION, pos3);
-	glLightfv(GL_LIGHT4, GL_POSITION, pos4);
-	glLightfv(GL_LIGHT5, GL_POSITION, pos5);
-	glLightfv(GL_LIGHT6, GL_POSITION, pos6);
-
+	glLightfv(GL_LIGHT0, GL_POSITION, luzes.at(0));
+	glLightfv(GL_LIGHT1, GL_POSITION, luzes.at(1));
+	glLightfv(GL_LIGHT2, GL_POSITION, luzes.at(2));
+	glLightfv(GL_LIGHT3, GL_POSITION, luzes.at(3));
 
 	drawVertices();
 
@@ -607,39 +597,6 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-/*	// Luz
-	lights = scene -> FirstChildElement("lights");
-	light = lights -> FirstChildElement("light");
-	for(; light != nullptr; light = light -> NextSiblingElement("light")) {
-		const char *tipo = light -> Attribute("type");
-		float X = light -> FloatAttribute("posX");
-		float Y = light -> FloatAttribute("posY");
-		float Z = light -> FloatAttribute("posZ");
-		float t;
-
-		if(strcmp(tipo, "POINT") == 0)
-			t = 1;
-		if(strcmp(tipo, "DIRECTIONAL") == 0)
-			t = 0;
-		if(strcmp(tipo, "SPOT") == 0) 
-			t = -1;
-
-		float pos[4] = {X, Y, Z, t};
-
-		// (int)16384 = GL_LIGHT0
-		glLightfv(GL_LIGHT0, GL_POSITION, pos);
-		numLights++;
-	}
-
-	for (int i = 0; i < numLights; i++) {
-		glEnable(GL_LIGHT0);
-	}*/
-
-    // Iterar pelos atributos group e adicioná-las a allGroups
-    group = scene -> FirstChildElement("group");
-    for(; group != nullptr; group = group -> NextSiblingElement("group")) {
-        addGroup(group, nullptr);
-    }
 
 	// init GLUT and the window
 	glutInit(&argc, argv);
@@ -662,33 +619,52 @@ int main(int argc, char **argv) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);
-	glEnable(GL_LIGHT2);
-	glEnable(GL_LIGHT3);
-	glEnable(GL_LIGHT4);
-	glEnable(GL_LIGHT5);
-	glEnable(GL_LIGHT6);
 	//glEnable(GL_TEXTURE_2D);
 
+	// Luz
 	float amb[4] = {0, 0, 0, 1};
-	glLightfv(GL_LIGHT0, GL_AMBIENT, amb);
-	glLightfv(GL_LIGHT1, GL_AMBIENT, amb);
-	glLightfv(GL_LIGHT2, GL_AMBIENT, amb);
-	glLightfv(GL_LIGHT3, GL_AMBIENT, amb);
-	glLightfv(GL_LIGHT4, GL_AMBIENT, amb);
-	glLightfv(GL_LIGHT5, GL_AMBIENT, amb);
-	glLightfv(GL_LIGHT6, GL_AMBIENT, amb);
-
 	float diff[4] = {1, 1, 1, 1};
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, diff);
-	glLightfv(GL_LIGHT2, GL_DIFFUSE, diff);
-	glLightfv(GL_LIGHT3, GL_DIFFUSE, diff);
-	glLightfv(GL_LIGHT4, GL_DIFFUSE, diff);
-	glLightfv(GL_LIGHT5, GL_DIFFUSE, diff);
-	glLightfv(GL_LIGHT6, GL_DIFFUSE, diff);
+	lights = scene -> FirstChildElement("lights");
+	light = lights -> FirstChildElement("light");
+	for(; light != nullptr; light = light -> NextSiblingElement("light")) {
+		const char *tipo = light -> Attribute("type");
+		float X = light -> FloatAttribute("posX");
+		float Y = light -> FloatAttribute("posY");
+		float Z = light -> FloatAttribute("posZ");
+		float t;
 
+		if(strcmp(tipo, "POINT") == 0)
+			t = 1;
+		if(strcmp(tipo, "DIRECTIONAL") == 0)
+			t = 0;
+		if(strcmp(tipo, "SPOT") == 0) 
+			t = -1;
+
+		float pos[4] = {X, Y, Z, t};
+
+		luzes.push_back(pos);
+
+		numLights++;
+	}
+
+		glEnable(GL_LIGHT0);
+		glEnable(GL_LIGHT1);
+		glEnable(GL_LIGHT2);
+		glEnable(GL_LIGHT3);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, amb);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
+		glLightfv(GL_LIGHT1, GL_AMBIENT, amb);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, diff);
+		glLightfv(GL_LIGHT2, GL_AMBIENT, amb);
+		glLightfv(GL_LIGHT2, GL_DIFFUSE, diff);
+		glLightfv(GL_LIGHT3, GL_AMBIENT, amb);
+		glLightfv(GL_LIGHT3, GL_DIFFUSE, diff);
+
+    // Iterar pelos atributos group e adicioná-las a allGroups
+    group = scene -> FirstChildElement("group");
+    for(; group != nullptr; group = group -> NextSiblingElement("group")) {
+        addGroup(group, nullptr);
+    }
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
