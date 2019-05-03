@@ -550,9 +550,17 @@ void drawBezier(char *patch_file, int tessellation) {
 		}
 	}
 
-	for(int i: indexes) {
-		CP c = vertices.at(i);
-		drawVertex(c.x, c.y, c.z);
+	// VER NORMAIS
+	for(int i = 3; i < indexes.size(); i += 3) {
+		CP c1 = vertices.at(indexes.at(i-3));
+		CP c2 = vertices.at(indexes.at(i-2));
+		CP c3 = vertices.at(indexes.at(i-1));
+		drawVertex(c1.x, c1.y, c1.z);
+		drawVertex(0,1,0);
+		drawVertex(c2.x, c2.y, c2.z);
+		drawVertex(0,1,0);
+		drawVertex(c3.x, c3.y, c3.z);
+		drawVertex(0,1,0);
 	}
 }
 

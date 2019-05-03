@@ -1,15 +1,15 @@
 <scene>
     <lights>
-        <light type="POINT" posX="0" posY="15" posZ="0" />
-        <light type="POINT" posX="0" posY="-15" posZ="0" />
+        <light type="DIRECTIONAL" posX="0" posY="15" posZ="0" />
+        <!--light type="POINT" posX="0" posY="-15" posZ="0" />
         <light type="POINT" posX="-15" posY="0" posZ="0" />
-        <light type="POINT" posX="15" posY="0" posZ="0" />
+        <light type="POINT" posX="15" posY="0" posZ="0" /-->
     </lights>
     <group>
         <rotate time="27" X="0" Y="1" Z="0"/>
         <scale X="10" Y="10" Z="10" />
         <models>
-            <model file = "../../sphere.3d" texture="../../Texturas/2k_sun.jpg" diffR="1.0" diffG="0.55" diffB = "0.2"/>
+            <model file = "../../sphere.3d" texture="../../Texturas/2k_sun.jpg"/>
         </models>
     </group>
 
@@ -35,7 +35,7 @@
             <rotate time="59" X="0" Y="1" Z="0"/>
             <scale X="0.5" Y="0.5" Z="0.5" />
             <models>
-                <model file="../../sphere.3d" texture="../../Texturas/2k_mercury.jpg" diffR="0.3" diffG="0.3" diffB="0.3"/>
+                <model file="../../sphere.3d" texture="../../Texturas/2k_mercury.jpg"/>
             </models>
         </group>
 
@@ -44,7 +44,7 @@
             <translate X="40" Y="0" Z="0" />
             <rotate time="-243" X="0" Y="1" Z="0"/>
             <models>
-                <model file="../../sphere.3d" texture="../../Texturas/2k_venus_surface.jpg" diffR="1.0" diffG="0.6" diffB="0.1"/>
+                <model file="../../sphere.3d" texture="../../Texturas/2k_venus_surface.jpg"/>
             </models>
         </group>
 
@@ -53,7 +53,7 @@
             <translate X="50" Y="0" Z="0" />
             <rotate time="0.999" X="0" Y="1" Z="0"/>
             <models>
-                <model file="../../sphere.3d" texture="../../Texturas/2k_earth_daymap.jpg" diffR="0.0" diffG="0.5" diffB="1.0"/>
+                <model file="../../sphere.3d" texture="../../Texturas/2k_earth_daymap.jpg"/>
             </models>
 
             <group>
@@ -62,7 +62,7 @@
                 <rotate time="28" X="0" Y="1" Z="0"/>
                 <scale X="0.2" Y="0.2" Z="0.2" />
                 <models>
-                    <model file="../../sphere.3d" texture="../../Texturas/2k_moon.jpg" diffR="0.7" diffG="0.7" diffB="0.7"/>
+                    <model file="../../sphere.3d" texture="../../Texturas/2k_moon.jpg"/>
                 </models>
             </group>
         </group>
@@ -72,7 +72,7 @@
             <translate X="60" Y="0" Z="0" />
             <rotate time="1.02" X="0" Y="1" Z="0"/>
             <models>
-                <model file="../../sphere.3d" texture="../../Texturas/2k_mars.jpg" diffR="0.9" diffG="0.15" diffB="0.05"/>
+                <model file="../../sphere.3d" texture="../../Texturas/2k_mars.jpg"/>
             </models>
         </group>
         
@@ -82,7 +82,7 @@
             <rotate time="0.413" X="0" Y="1" Z="0"/>
             <scale X="4" Y="4" Z="4" />
             <models>
-                <model file="../../sphere.3d" texture="../../Texturas/2k_jupiter.jpg" diffR="0.9" diffG="0.8" diffB="0.45"/>
+                <model file="../../sphere.3d" texture="../../Texturas/2k_jupiter.jpg"/>
             </models>
         </group>
 
@@ -92,7 +92,7 @@
             <rotate time="0.4583" X="0" Y="1" Z="0"/>
             <scale X="3" Y="3" Z="3" />
             <models>
-                <model file="../../sphere.3d" texture="../../Texturas/2k_saturn.jpg" diffR="1.0" diffG="0.9" diffB="0.2"/>
+                <model file="../../sphere.3d" texture="../../Texturas/2k_saturn.jpg"/>
             </models>
         </group>
 
@@ -102,7 +102,7 @@
             <rotate time="-0.7083" X="0" Y="1" Z="0"/>
             <scale X="2" Y="2" Z="2" />
             <models>
-                <model file="../../sphere.3d" texture="../../Texturas/2k_uranus.jpg" diffR="0.2" diffG="1.0" diffB="1.0"/>
+                <model file="../../sphere.3d" texture="../../Texturas/2k_uranus.jpg"/>
             </models>
         </group>
 
@@ -112,7 +112,7 @@
             <rotate time="0.6667" X="0" Y="1" Z="0"/>
             <scale X="2" Y="2" Z="2" />
             <models>
-                <model file="../../sphere.3d" texture="../../Texturas/2k_neptune.jpg" diffR="0.0" diffG="0.4" diffB="0.9"/>
+                <model file="../../sphere.3d" texture="../../Texturas/2k_neptune.jpg"/>
             </models>
         </group>
         

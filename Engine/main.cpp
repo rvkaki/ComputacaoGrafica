@@ -12,7 +12,7 @@
 #include "tinyxml2.h"
 using namespace tinyxml2;
 
-int numModels = 0;
+int numModels = 0, numLights = 0;
 GLuint *vertices, *normals, *texCoords;
 
 int total = 0;
@@ -201,13 +201,13 @@ v_2d extractVertice2d(std::string s) {
     // x
     p = s.find(del);
     token = s.substr(0, p);
-    x = atof(token.c_str());
+    y = atof(token.c_str());
     s.erase(0, p + del.length());
 
     // y
     p = s.find(del);
     token = s.substr(0, p);
-    y = atof(token.c_str());
+    x = atof(token.c_str());
 
     return v_2d(x, y);
 }
@@ -219,8 +219,8 @@ model addVertices(std::ifstream &vertices) {
 	int numVertices = 0;
 
     while(vertices.getline(x, 100)) {
+		if(strcmp(x, "TEXTURA:") == 0) break;
 		vertices.getline(y, 100);
-		if(strcmp(x, "TEXTURA:") == 0 || strcmp(y, "TEXTURA:") == 0) break;
 		md.vertices.push_back(extractVertice(x));
 		md.normals.push_back(extractVertice(y));
 		numVertices++;
@@ -237,7 +237,6 @@ model addVertices(std::ifstream &vertices) {
 
 int loadTexture(std::string s) {
 
-	printf("Cheguei aqui2\n");
 	unsigned int t, tw, th;
 	unsigned char *texData;
 	unsigned int texID;
@@ -311,15 +310,17 @@ void addGroup(XMLElement *group, Group *parent) {
 		}
 
 		else if(name == "models") {
+			int i = 0; // contador de modelos do Grupo atual
 			for(XMLElement *model = elem -> FirstChildElement("model"); model != nullptr; model = model -> NextSiblingElement("model")) {
 				std::ifstream f;
 				f.open(model->Attribute("file"));
 				curG.models.push_back(addVertices(f));
 				f.close();
 
-				printf("%s\n", model -> Attribute("texture"));
-				curG.models.at(numModels).texture = loadTexture(model->Attribute("texture"));
-
+				const char* t = model->Attribute("texture");
+				if(t)
+					curG.models.at(i).texture = loadTexture(t);
+				i++;
 				numModels++;
 			
 
@@ -503,10 +504,11 @@ void renderScene() {
 		0.0, 0.0, 0.0,
 		0.0f, 1.0f, 0.0f);
 
-	/*glLightfv(GL_LIGHT0, GL_POSITION, luzes.at(0));
-	glLightfv(GL_LIGHT1, GL_POSITION, luzes.at(1));
-	glLightfv(GL_LIGHT2, GL_POSITION, luzes.at(2));
-	glLightfv(GL_LIGHT3, GL_POSITION, luzes.at(3));*/
+	glPushMatrix();
+	for(int i = 0; i < numLights; i++) {
+		glLightfv(GL_LIGHT0 + i, GL_POSITION, luzes.at(i));
+	}
+	glPopMatrix();
 
 	drawVertices();
 
@@ -599,7 +601,6 @@ int main(int argc, char **argv) {
 	XMLDocument doc;
     XMLError e;
     XMLElement *scene, *group, *lights, *light;
-	int numLights = 0;
 
     if(argc != 2) {
         std::cout << "Forneça um ficheiro XLM\n";
@@ -619,7 +620,6 @@ int main(int argc, char **argv) {
         std::cout << "Formato inválido\n";
         exit(EXIT_FAILURE);
     }
-
 
 	// init GLUT and the window
 	glutInit(&argc, argv);
@@ -641,53 +641,47 @@ int main(int argc, char **argv) {
 	//  OpenGL settings
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	//glEnable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
-/*
-	// Luz
-	float amb[4] = {0, 0, 0, 1};
-	float diff[4] = {1, 1, 1, 1};
+
 	lights = scene -> FirstChildElement("lights");
-	light = lights -> FirstChildElement("light");
-	for(; light != nullptr; light = light -> NextSiblingElement("light")) {
-		const char *tipo = light -> Attribute("type");
-		float X = light -> FloatAttribute("posX");
-		float Y = light -> FloatAttribute("posY");
-		float Z = light -> FloatAttribute("posZ");
-		float t;
+	if (lights) {
+		glEnable(GL_LIGHTING);
 
-		if(strcmp(tipo, "POINT") == 0)
-			t = 1;
-		if(strcmp(tipo, "DIRECTIONAL") == 0)
-			t = 0;
-		if(strcmp(tipo, "SPOT") == 0) 
-			t = -1;
+		// Luz
+		float amb[4] = {0, 0, 0, 1};
+		float diff[4] = {1, 1, 1, 1};
+		light = lights -> FirstChildElement("light");
+		for(; light != nullptr; light = light -> NextSiblingElement("light")) {
+		
+			glEnable(GL_LIGHT0 + numLights);
+			glLightfv(GL_LIGHT0 + numLights, GL_AMBIENT, amb);
+			glLightfv(GL_LIGHT0 + numLights, GL_DIFFUSE, diff);
+		
+			const char *tipo = light -> Attribute("type");
+			float X = light -> FloatAttribute("posX");
+			float Y = light -> FloatAttribute("posY");
+			float Z = light -> FloatAttribute("posZ");
+			float t;
 
-		float pos[4] = {X, Y, Z, t};
+			if(strcmp(tipo, "POINT") == 0)
+				t = 1;
+			if(strcmp(tipo, "DIRECTIONAL") == 0)
+				t = 0;
+			if(strcmp(tipo, "SPOT") == 0) 
+				t = -1;
 
-		luzes.push_back(pos);
+			float pos[4] = {X, Y, Z, t};
 
-		numLights++;
+			luzes.push_back(pos);
+
+			numLights++;
+		}
 	}
-
-		glEnable(GL_LIGHT0);
-		glEnable(GL_LIGHT1);
-		glEnable(GL_LIGHT2);
-		glEnable(GL_LIGHT3);
-		glLightfv(GL_LIGHT0, GL_AMBIENT, amb);
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
-		glLightfv(GL_LIGHT1, GL_AMBIENT, amb);
-		glLightfv(GL_LIGHT1, GL_DIFFUSE, diff);
-		glLightfv(GL_LIGHT2, GL_AMBIENT, amb);
-		glLightfv(GL_LIGHT2, GL_DIFFUSE, diff);
-		glLightfv(GL_LIGHT3, GL_AMBIENT, amb);
-		glLightfv(GL_LIGHT3, GL_DIFFUSE, diff);
-*/
+			
     // Iterar pelos atributos group e adicioná-las a allGroups
     group = scene -> FirstChildElement("group");
     for(; group != nullptr; group = group -> NextSiblingElement("group")) {
         addGroup(group, nullptr);
-		printf("Cheguei aqui\n");
 
     }
 
