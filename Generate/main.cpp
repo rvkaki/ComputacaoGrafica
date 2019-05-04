@@ -555,12 +555,29 @@ void drawBezier(char *patch_file, int tessellation) {
 		CP c1 = vertices.at(indexes.at(i-3));
 		CP c2 = vertices.at(indexes.at(i-2));
 		CP c3 = vertices.at(indexes.at(i-1));
+		float p1[3] = {c1.x, c1.y, c1.z}, p2[3] = {c2.x, c2.y, c2.z}, p3[3] = {c3.x, c3.y, c3.z};
+		
 		drawVertex(c1.x, c1.y, c1.z);
-		drawVertex(0,1,0);
+		float *v1 = getVector(p1, p2);
+		float *v2 = getVector(p1, p3);
+		float n1[3];
+		cross(v1, v2, n1);
+		normalize(n1);
+		drawVertexA(n1);
+
 		drawVertex(c2.x, c2.y, c2.z);
-		drawVertex(0,1,0);
+		v1 = getVector(p2, p1);
+		v2 = getVector(p2, p3);
+		cross(v1, v2, n1);
+		normalize(n1);
+		drawVertexA(n1);
+
 		drawVertex(c3.x, c3.y, c3.z);
-		drawVertex(0,1,0);
+		v1 = getVector(p3, p2);
+		v2 = getVector(p3, p1);
+		cross(v1, v2, n1);
+		normalize(n1);
+		drawVertexA(n1);
 	}
 }
 
