@@ -40,16 +40,16 @@ struct model {
 	int indice;
 	int numVertices;
 	int texture;
-	std::vector<vertice> vertices;
-	std::vector<vertice> normals;
+	Vertices vertices;
+	Vertices normals;
 	std::vector<v_2d> texCoords;
 } Model;
 
 typedef struct group {
-	Transformations trans;
-	Curva c;
-	std::vector<struct model> models;
-	std::vector<struct group> subGroups;
+	Transformations trans; // para guardar as transformações
+	Curva c; // para guardar uma curva, caso exista
+	std::vector<struct model> models; // para guardar os modelos
+	std::vector<struct group> subGroups; // para guardar os subgrupos
 } Group;
 
 typedef std::vector<Group> Groups;
@@ -398,7 +398,7 @@ void drawGroup(Group g) {
 				x = std::get<2>(tr);
 				y = std::get<3>(tr);
 				z = std::get<4>(tr);
-				rots++;
+				rots++;		
 				glRotatef(a, x, y, z);
 				}
 				break;
@@ -630,7 +630,7 @@ int main(int argc, char **argv) {
 
 	// Required callback registry 
 	glutDisplayFunc(renderScene);
-    glutIdleFunc(renderScene);
+    //glutIdleFunc(renderScene);
 	glutReshapeFunc(changeSize);
 
 	// Callback registration for keyboard processing
