@@ -492,6 +492,8 @@ void fillVBOs(Group g) {
 	}
 }
 
+float pX = dist*cos(beta)*sin(alpha), pY = dist*sin(beta), pZ = dist*cos(beta)*cos(alpha);
+float laX = 0.0, laY = 0.0, laZ = 0.0;
 
 void renderScene() {
 	// clear buffers
@@ -500,8 +502,8 @@ void renderScene() {
 
 	// set the camera
 	glLoadIdentity();
-	gluLookAt(dist*cos(beta)*sin(alpha), dist*sin(beta), dist*cos(beta)*cos(alpha),
-		0.0, 0.0, 0.0,
+	gluLookAt(pX, pY, pZ,
+		laX, laY, laZ,
 		0.0f, 1.0f, 0.0f);
 
 	glPushMatrix();
@@ -519,34 +521,69 @@ void renderScene() {
 void processKeys(unsigned char c, int xx, int yy) {
 	// put code to process regular keys in here
 	float deltaToZoom = 0.5;
-	float deltaToMove = 0.3;
+	float deltaToMove = 0.1;
+	float r[3], d[3] = {laX - pX, pY, laY - pY}, up[3] = {0.0, 1.0, 0.0};
 	switch (c) {
 		case 'w':
-			xd -= deltaToMove;
-			zd -= deltaToMove;
+			pX += deltaToMove*d[0];
+			pZ += deltaToMove*d[2];
+			laX += deltaToMove*d[0];
+			laZ += deltaToMove*d[2];
 			break;
 
 		case 'a':
-			xd -= deltaToMove;
-			zd += deltaToMove;
+			cross(up, d, r);
+			pX += deltaToMove*r[0];
+			pZ += deltaToMove*r[2];
+			laX += deltaToMove*r[0];
+			laZ += deltaToMove*r[2];
 			break;
 
 		case 's':
-			xd += deltaToMove;
-			zd += deltaToMove;
+			pX -= deltaToMove*d[0];
+			pZ -= deltaToMove*d[2];
+			laX -= deltaToMove*d[0];
+			laZ -= deltaToMove*d[2];
 			break;
 
 		case 'd':
-			xd += deltaToMove;
-			zd -= deltaToMove;
+			cross(d, up, r);
+			pX += deltaToMove*r[0];
+			pZ += deltaToMove*r[2];
+			laX += deltaToMove*r[0];
+			laZ += deltaToMove*r[2];
+			break;
+
+		case 'u':
+			laX += deltaToMove*d[0];
+			laZ += deltaToMove*d[2];
+			break;
+
+		case 'h':
+			cross(up, d, r);
+			laX += deltaToMove*r[0];
+			laZ += deltaToMove*r[2];
+			break;
+
+		case 'j':
+			laX -= deltaToMove*d[0];
+			laZ -= deltaToMove*d[2];
+			break;
+
+		case 'k':
+			cross(d, up, r);
+			laX += deltaToMove*r[0];
+			laZ += deltaToMove*r[2];
 			break;
 
 		case 'q':
-			dist += deltaToZoom;
+			pX += deltaToZoom;
+			pZ += deltaToZoom;
 			break;
 
 		case 'e':
-			dist -= deltaToZoom;
+			pX -= deltaToZoom;
+			pZ -= deltaToZoom;
 			break;
 
 		case 'f':
@@ -561,40 +598,78 @@ void processKeys(unsigned char c, int xx, int yy) {
 			glPolygonMode(GL_FRONT, GL_POINT);
 			break;
 
+
 		default:
 			return;
 	}
 
-	glutPostRedisplay();
-
 }
 
+int startX, startY, tracking = 0;
+float r = 50;
 
-void processSpecialKeys(int key, int xx, int yy) {
-	// put code to process special keys in here
-	float deltaToMove = 0.3;
-	switch (key) {
-	case GLUT_KEY_UP:
-		beta += deltaToMove;
-		break;
-
-	case GLUT_KEY_DOWN:
-		beta -= deltaToMove;
-		break;
-
-	case GLUT_KEY_LEFT:
-		alpha -= deltaToMove;
-		break;
-
-	case GLUT_KEY_RIGHT:
-		alpha += deltaToMove;
-		break;
-
-	default:
-		return;
+void processMouseButtons(int button, int state, int xx, int yy) {
+	
+	if (state == GLUT_DOWN)  {
+		startX = xx;
+		startY = yy;
+		if (button == GLUT_LEFT_BUTTON)
+			tracking = 1;
+		else if (button == GLUT_RIGHT_BUTTON)
+			tracking = 2;
+		else
+			tracking = 0;
 	}
+	else if (state == GLUT_UP) {
+		if (tracking == 1) {
+			alpha += (xx - startX);
+			beta += (yy - startY);
+		}
+		else if (tracking == 2) {
+			
+			r -= yy - startY;
+			if (r < 3)
+				r = 3.0;
+		}
+		tracking = 0;
+	}
+}
 
-	glutPostRedisplay();
+void processMouseMotion(int xx, int yy) {
+
+	int deltaX, deltaY;
+	int alphaAux, betaAux;
+	int rAux;
+
+	if (!tracking)
+		return;
+
+	deltaX = xx - startX;
+	deltaY = yy - startY;
+
+	if (tracking == 1) {
+
+
+		alphaAux = alpha + deltaX;
+		betaAux = beta + deltaY;
+
+		if (betaAux > 85.0)
+			betaAux = 85.0;
+		else if (betaAux < -85.0)
+			betaAux = -85.0;
+
+		rAux = r;
+	}
+	else if (tracking == 2) {
+
+		alphaAux = alpha;
+		betaAux = beta;
+		rAux = r - deltaY;
+		if (rAux < 3)
+			rAux = 3;
+	}
+	laX = rAux * sin(alphaAux * 3.14 / 180.0) * cos(betaAux * 3.14 / 180.0);
+	laZ = rAux * cos(alphaAux * 3.14 / 180.0) * cos(betaAux * 3.14 / 180.0);
 }
 
 int main(int argc, char **argv) {
@@ -635,7 +710,8 @@ int main(int argc, char **argv) {
 
 	// Callback registration for keyboard processing
 	glutKeyboardFunc(processKeys);
-	glutSpecialFunc(processSpecialKeys);
+	glutMouseFunc(processMouseButtons);
+	glutMotionFunc(processMouseMotion);
 	glewInit();
 
 	//  OpenGL settings
