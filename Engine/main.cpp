@@ -39,7 +39,7 @@ typedef struct curva {
 struct model {
 	int indice;
 	int numVertices;
-	int texture;
+	int texture = 0;
 	std::vector<vertice> vertices;
 	std::vector<vertice> normals;
 	std::vector<v_2d> texCoords;
@@ -359,20 +359,32 @@ void addGroup(XMLElement *group, Group *parent) {
 
 void drawVBOs(std::vector<struct model> models) {
 	for(model m: models){
-		glBindTexture(GL_TEXTURE_2D, m.texture);
+		if(m.texture) {
+			glBindTexture(GL_TEXTURE_2D, m.texture);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vertices[m.indice]);
-		glVertexPointer(3, GL_FLOAT, 0, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, vertices[m.indice]);
+			glVertexPointer(3, GL_FLOAT, 0, 0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, normals[m.indice]);
-		glNormalPointer(GL_FLOAT, 0, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, normals[m.indice]);
+			glNormalPointer(GL_FLOAT, 0, 0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, texCoords[m.indice]);
-		glTexCoordPointer(2, GL_FLOAT, 0, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, texCoords[m.indice]);
+			glTexCoordPointer(2, GL_FLOAT, 0, 0);
 
-		glDrawArrays(GL_TRIANGLES, 0, m.numVertices);
+			glDrawArrays(GL_TRIANGLES, 0, m.numVertices);
 
-		glBindTexture(GL_TEXTURE_2D, 0);	
+			glBindTexture(GL_TEXTURE_2D, 0);
+		} else {
+			glDisable(GL_TEXTURE_2D);
+			glBindBuffer(GL_ARRAY_BUFFER, vertices[m.indice]);
+			glVertexPointer(3, GL_FLOAT, 0, 0);
+
+			glBindBuffer(GL_ARRAY_BUFFER, normals[m.indice]);
+			glNormalPointer(GL_FLOAT, 0, 0);
+
+			glDrawArrays(GL_TRIANGLES, 0, m.numVertices);
+			glEnable(GL_TEXTURE_2D);
+		}
 	}
 }
 
@@ -413,6 +425,7 @@ void drawGroup(Group g) {
 
 			case 'C':
 				{
+					glDisable(GL_TEXTURE_2D);
 					R = std::get<1>(tr);
 					G = std::get<2>(tr);
 					B = std::get<3>(tr);
@@ -426,6 +439,7 @@ void drawGroup(Group g) {
 						glMaterialfv(GL_FRONT, GL_EMISSION, cor);
 					if(tipo == 3)
 						glMaterialfv(GL_FRONT, GL_AMBIENT, cor);
+					glEnable(GL_TEXTURE_2D);
 				
 				}
 				break;
@@ -730,8 +744,8 @@ int main(int argc, char **argv) {
 		for(; light != nullptr; light = light -> NextSiblingElement("light")) {
 		
 			glEnable(GL_LIGHT0 + numLights);
-			glLightfv(GL_LIGHT0 + numLights, GL_AMBIENT, amb);
-			glLightfv(GL_LIGHT0 + numLights, GL_DIFFUSE, diff);
+			//glLightfv(GL_LIGHT0 + numLights, GL_AMBIENT, amb);
+			//glLightfv(GL_LIGHT0 + numLights, GL_DIFFUSE, diff);
 		
 			const char *tipo = light -> Attribute("type");
 			float X = light -> FloatAttribute("posX");
