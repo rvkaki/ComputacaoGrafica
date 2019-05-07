@@ -17,9 +17,9 @@ GLuint *vertices, *normals, *texCoords;
 
 int total = 0;
 
-GLdouble dist = 100, beta = M_PI_4, alpha = M_PI_4, xd = 0, zd = 0;
+GLdouble dist = 100, beta = 0, alpha = M_PI_4, xd = 0, zd = 0;
 
-float accelerator = 10;
+float accelerator = 1;
 
 typedef std::tuple<float, float, float> vertice;
 typedef std::tuple<float, float> v_2d;
@@ -496,9 +496,6 @@ void drawGroup(Group g) {
 }
 
 void drawVertices() {
-	float diff[4] = {0.0, 0.0, 0.0, 1.0};
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, diff);
-
     for(Group g: allGroups) {
 		drawGroup(g);
 	}
@@ -523,6 +520,7 @@ void fillVBOs(Group g) {
 
 float camX = dist*cos(beta)*sin(alpha), camY = dist*sin(beta), camZ = dist*cos(beta)*cos(alpha);
 float laX = 0.0, laY = 0.0, laZ = 0.0;
+float r = dist;
 
 void renderScene() {
 	// clear buffers
@@ -531,11 +529,10 @@ void renderScene() {
 	// set the camera
 	glLoadIdentity();
 	gluLookAt(camX, camY, camZ,
-		0.0, 0.0, 0.0,
+		laX, laY, laZ,
 		0.0f, 1.0f, 0.0f);
 
 	for(int i = 0; i < numLights; i++) {
-		printf("%d\n", GL_LIGHT0 + i);
 		glLightfv(GL_LIGHT0 + i, GL_POSITION, luzes.at(i));
 	}
 	drawVertices();
@@ -550,9 +547,6 @@ void processKeys(unsigned char key, int xx, int yy) {
 	float d[3] = {laX - camX, 0, laZ - camZ};
 	float r[3], up[3] = {0.0, 1.0, 0.0};
 	normalize(d);
-	float dx, dz;
-	dx = d[0]; 
-	dz = d[2];
 	switch(key) {
 		case 'w':
 			camX += deltaToMove*d[0];
@@ -584,16 +578,6 @@ void processKeys(unsigned char key, int xx, int yy) {
 			laZ += deltaToMove*r[2];
 			break;
 
-		case 'e':
-			camX += deltaToZoom*d[0];
-			camZ += deltaToZoom*d[2];
-			break;
-
-		case 'q':
-			camX -= deltaToZoom*d[0];
-			camZ -= deltaToZoom*d[2];
-			break;
-
 		case 'f':
 			glPolygonMode(GL_FRONT, GL_FILL);
 			break;
@@ -613,73 +597,39 @@ void processKeys(unsigned char key, int xx, int yy) {
 	glutPostRedisplay();
 }
 
-int startX, startY, tracking = 0;
-float r = 50;
 
-void processMouseButtons(int button, int state, int xx, int yy) {
-	
-	if (state == GLUT_DOWN)  {
-		startX = xx;
-		startY = yy;
-		if (button == GLUT_LEFT_BUTTON)
-			tracking = 1;
-		else if (button == GLUT_RIGHT_BUTTON)
-			tracking = 2;
-		else
-			tracking = 0;
-	}
-	else if (state == GLUT_UP) {
-		if (tracking == 1) {
-			alpha += (xx - startX);
-			beta += (yy - startY);
+float auxBeta = beta, auxAlpha = alpha;
+
+void processSpecialKeys(int key, int xx, int yy) {
+	float deltaToMove = 1;
+	float d[3] = {laX - camX, 0, laZ - camZ};
+	float r[3], up[3] = {0.0, 1.0, 0.0};
+	normalize(d);
+	switch (key) {
+		case GLUT_KEY_RIGHT:
+			auxAlpha -= 0.1;
+			break;
+
+		case GLUT_KEY_LEFT:
+			auxAlpha += 0.1;
+			break;
+
+		case GLUT_KEY_UP:
+			auxBeta += 0.1f;
+			if (auxBeta > 1.5f)
+				auxBeta = 1.5f;
+			break;
+
+		case GLUT_KEY_DOWN:
+			auxBeta -= 0.1f;
+			if (auxBeta < -1.5f)
+				auxBeta = -1.5f;
+			break;
 		}
-		else if (tracking == 2) {
-			
-			r -= yy - startY;
-			if (r < 3)
-				r = 3.0;
-		}
-		tracking = 0;
-	}
-}
 
-
-void processMouseMotion(int xx, int yy) {
-
-	int deltaX, deltaY;
-	int alphaAux, betaAux;
-	int rAux;
-
-	if (!tracking)
-		return;
-
-	deltaX = xx - startX;
-	deltaY = yy - startY;
-
-	if (tracking == 1) {
-
-
-		alphaAux = alpha + deltaX;
-		betaAux = beta + deltaY;
-
-		if (betaAux > 85.0)
-			betaAux = 85.0;
-		else if (betaAux < -85.0)
-			betaAux = -85.0;
-
-		rAux = r;
-	}
-	else if (tracking == 2) {
-
-		alphaAux = alpha;
-		betaAux = beta;
-		rAux = r - deltaY;
-		if (rAux < 3)
-			rAux = 3;
-	}
-	camX = rAux * sin(alphaAux * 3.14 / 180.0) * cos(betaAux * 3.14 / 180.0);
-	camZ = rAux * cos(alphaAux * 3.14 / 180.0) * cos(betaAux * 3.14 / 180.0);
-	camY = rAux * 							     sin(betaAux * 3.14 / 180.0);
+		camX = dist*cos(auxBeta)*sin(auxAlpha);
+		camY = dist*sin(auxBeta);
+		camZ = dist*cos(auxBeta)*cos(auxAlpha);
 }
 
 int main(int argc, char **argv) {
@@ -720,9 +670,12 @@ int main(int argc, char **argv) {
 
 	// Callback registration for keyboard processing
 	glutKeyboardFunc(processKeys);
-	glutMouseFunc(processMouseButtons);
-	glutMotionFunc(processMouseMotion);
+	glutSpecialFunc(processSpecialKeys);
 	glewInit();
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	//  OpenGL settings
 	glEnable(GL_DEPTH_TEST);
@@ -767,10 +720,6 @@ int main(int argc, char **argv) {
         addGroup(group, nullptr);
 
     }
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	//Buffers
 	vertices = (GLuint *)malloc(numModels * sizeof(GLuint));
