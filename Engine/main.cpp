@@ -484,6 +484,9 @@ void drawGroup(Group g) {
 }
 
 void drawVertices() {
+	float diff[4] = {0.0, 0.0, 0.0, 1.0};
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diff);
+
     for(Group g: allGroups) {
 		drawGroup(g);
 	}
@@ -506,7 +509,7 @@ void fillVBOs(Group g) {
 	}
 }
 
-float pX = dist*cos(beta)*sin(alpha), pY = dist*sin(beta), pZ = dist*cos(beta)*cos(alpha);
+float camX = dist*cos(beta)*sin(alpha), camY = dist*sin(beta), camZ = dist*cos(beta)*cos(alpha);
 float laX = 0.0, laY = 0.0, laZ = 0.0;
 
 void renderScene() {
@@ -516,15 +519,13 @@ void renderScene() {
 
 	// set the camera
 	glLoadIdentity();
-	gluLookAt(pX, pY, pZ,
+	gluLookAt(camX, camY, camZ,
 		laX, laY, laZ,
 		0.0f, 1.0f, 0.0f);
 
-	glPushMatrix();
 	for(int i = 0; i < numLights; i++) {
 		glLightfv(GL_LIGHT0 + i, GL_POSITION, luzes.at(i));
 	}
-	glPopMatrix();
 
 	drawVertices();
 
@@ -532,6 +533,74 @@ void renderScene() {
 	glutSwapBuffers();
 }
 
+void processKeys(unsigned char key, int xx, int yy) {
+	float deltaToMove = 0.5;
+	float deltaToZoom = 0.2;
+	float d[3] = {laX - camX, 0, laZ - camZ};
+	float r[3], up[3] = {0.0, 1.0, 0.0};
+	normalize(d);
+	float dx, dz;
+	dx = d[0]; 
+	dz = d[2]; 
+	switch(key) {
+		case 'w':
+			camX += deltaToMove*d[0];
+			camZ += deltaToMove*d[2];
+			laX += deltaToMove*d[0];
+			laZ += deltaToMove*d[2];
+			break;
+
+		case 'a':
+			cross(up, d, r);
+			camX += deltaToMove*r[0];
+			camZ += deltaToMove*r[2];
+			laX += deltaToMove*r[0];
+			laZ += deltaToMove*r[2];
+			break;
+
+		case 's':
+			camX -= deltaToMove*d[0];
+			camZ -= deltaToMove*d[2];
+			laX -= deltaToMove*d[0];
+			laZ -= deltaToMove*d[2];
+			break;
+
+		case 'd':
+			cross(d, up, r);
+			camX += deltaToMove*r[0];
+			camZ += deltaToMove*r[2];
+			laX += deltaToMove*r[0];
+			laZ += deltaToMove*r[2];
+			break;
+
+		case GLUT_KEY_PAGE_UP:
+			camX += deltaToZoom*d[0];
+			camZ += deltaToZoom*d[2];
+			break;
+
+		case GLUT_KEY_PAGE_DOWN:
+			camX -= deltaToZoom*d[0];
+			camZ -= deltaToZoom*d[2];
+			break;
+
+		case 'f':
+			glPolygonMode(GL_FRONT, GL_FILL);
+			break;
+
+		case 'l':
+			glPolygonMode(GL_FRONT, GL_LINE);
+			break;
+
+		case 'p':
+			glPolygonMode(GL_FRONT, GL_POINT);
+			break;
+
+		default:
+			break;
+	}
+}
+
+/*
 void processKeys(unsigned char c, int xx, int yy) {
 	// put code to process regular keys in here
 	float deltaToZoom = 0.5;
@@ -618,6 +687,7 @@ void processKeys(unsigned char c, int xx, int yy) {
 	}
 
 }
+*/
 
 int startX, startY, tracking = 0;
 float r = 50;
@@ -648,6 +718,7 @@ void processMouseButtons(int button, int state, int xx, int yy) {
 		tracking = 0;
 	}
 }
+
 
 void processMouseMotion(int xx, int yy) {
 
@@ -682,8 +753,9 @@ void processMouseMotion(int xx, int yy) {
 		if (rAux < 3)
 			rAux = 3;
 	}
-	laX = rAux * sin(alphaAux * 3.14 / 180.0) * cos(betaAux * 3.14 / 180.0);
-	laZ = rAux * cos(alphaAux * 3.14 / 180.0) * cos(betaAux * 3.14 / 180.0);
+	camX = rAux * sin(alphaAux * 3.14 / 180.0) * cos(betaAux * 3.14 / 180.0);
+	camZ = rAux * cos(alphaAux * 3.14 / 180.0) * cos(betaAux * 3.14 / 180.0);
+	camY = rAux * 							     sin(betaAux * 3.14 / 180.0);
 }
 
 int main(int argc, char **argv) {
@@ -719,7 +791,7 @@ int main(int argc, char **argv) {
 
 	// Required callback registry 
 	glutDisplayFunc(renderScene);
-    //glutIdleFunc(renderScene);
+    glutIdleFunc(renderScene);
 	glutReshapeFunc(changeSize);
 
 	// Callback registration for keyboard processing
@@ -744,8 +816,8 @@ int main(int argc, char **argv) {
 		for(; light != nullptr; light = light -> NextSiblingElement("light")) {
 		
 			glEnable(GL_LIGHT0 + numLights);
-			//glLightfv(GL_LIGHT0 + numLights, GL_AMBIENT, amb);
-			//glLightfv(GL_LIGHT0 + numLights, GL_DIFFUSE, diff);
+			glLightfv(GL_LIGHT0 + numLights, GL_AMBIENT, amb);
+			glLightfv(GL_LIGHT0 + numLights, GL_DIFFUSE, diff);
 		
 			const char *tipo = light -> Attribute("type");
 			float X = light -> FloatAttribute("posX");
@@ -757,8 +829,6 @@ int main(int argc, char **argv) {
 				t = 1;
 			if(strcmp(tipo, "DIRECTIONAL") == 0)
 				t = 0;
-			if(strcmp(tipo, "SPOT") == 0) 
-				t = -1;
 
 			float pos[4] = {X, Y, Z, t};
 
