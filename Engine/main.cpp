@@ -17,7 +17,7 @@ GLuint *vertices, *normals, *texCoords;
 
 int total = 0;
 
-GLdouble dist = 100, beta = 0, alpha = M_PI_4, xd = 0, zd = 0;
+GLdouble dist = 100, beta = 0, alpha = 0, xd = 0, zd = 0;
 
 float accelerator = 1;
 
@@ -561,12 +561,12 @@ void renderScene() {
 	glutSwapBuffers();
 }
 
-float auxBeta = beta, auxAlpha = alpha, auxDist = dist;
+float auxBeta = beta, auxAlpha = alpha;
 
 void processKeys(unsigned char key, int xx, int yy) {
 	float deltaToMove = 0.5;
 	float deltaToZoom = 0.5;
-	float d[3] = {laX - camX, 0, laZ - camZ};
+	float d[3] = {laX - camX, laY - camY, laZ - camZ};
 	float r[3], up[3] = {0.0, 1.0, 0.0};
 	normalize(d);
 	switch(key) {
@@ -601,17 +601,13 @@ void processKeys(unsigned char key, int xx, int yy) {
 			break;
 
 		case 'e':
-			auxDist += deltaToZoom;
-			camX = auxDist*cos(auxBeta)*sin(auxAlpha);
-			camY = auxDist*sin(auxBeta);
-			camZ = auxDist*cos(auxBeta)*cos(auxAlpha);
+			camY += deltaToMove*up[1];
+			laY += deltaToMove*up[1];
 			break;
 
 		case 'q':
-			auxDist -= deltaToZoom;
-			camX = auxDist*cos(auxBeta)*sin(auxAlpha);
-			camY = auxDist*sin(auxBeta);
-			camZ = auxDist*cos(auxBeta)*cos(auxAlpha);
+			camY -= deltaToMove*up[1];
+			laY -= deltaToMove*up[1];
 			break;
 		
 		case 'f':
@@ -634,10 +630,7 @@ void processKeys(unsigned char key, int xx, int yy) {
 }
 
 void processSpecialKeys(int key, int xx, int yy) {
-	float deltaToMove = 1;
-	float d[3] = {laX - camX, 0, laZ - camZ};
-	float r[3], up[3] = {0.0, 1.0, 0.0};
-	normalize(d);
+
 	switch (key) {
 		case GLUT_KEY_RIGHT:
 			auxAlpha -= 0.1;
@@ -660,9 +653,9 @@ void processSpecialKeys(int key, int xx, int yy) {
 			break;
 		}
 
-		camX = auxDist*cos(auxBeta)*sin(auxAlpha);
-		camY = auxDist*sin(auxBeta);
-		camZ = auxDist*cos(auxBeta)*cos(auxAlpha);
+		laX = dist*cos(auxBeta)*sin(auxAlpha);
+		laY = dist*sin(auxBeta);
+		laZ = dist*cos(auxBeta)*cos(auxAlpha);
 }
 
 int main(int argc, char **argv) {
