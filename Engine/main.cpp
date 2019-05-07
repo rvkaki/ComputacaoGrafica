@@ -518,6 +518,23 @@ void fillVBOs(Group g) {
 	}
 }
 
+void drawAxis() {
+	glBegin(GL_LINES);
+		// x
+		glColor3f(1.0, 0.0, 0.0);
+		glVertex3f(-100.0, 0.0, 0.0);
+		glVertex3f(100.0, 0.0, 0.0);
+		// y
+		glColor3f(0.0, 1.0, 0.0);
+		glVertex3f(0.0, -100.0, 0.0);
+		glVertex3f(0.0, 100.0, 0.0);
+		// z
+		glColor3f(0.0, 0.0, 1.0);
+		glVertex3f(0.0, 0.0, -100.0);
+		glVertex3f(0.0, 0.0, 100.0);
+	glEnd();
+}
+
 float camX = dist*cos(beta)*sin(alpha), camY = dist*sin(beta), camZ = dist*cos(beta)*cos(alpha);
 float laX = 0.0, laY = 0.0, laZ = 0.0;
 float r = dist;
@@ -535,11 +552,16 @@ void renderScene() {
 	for(int i = 0; i < numLights; i++) {
 		glLightfv(GL_LIGHT0 + i, GL_POSITION, luzes.at(i));
 	}
+
+	//drawAxis();
+
 	drawVertices();
 
 	// End of frame
 	glutSwapBuffers();
 }
+
+float auxBeta = beta, auxAlpha = alpha, auxDist = dist;
 
 void processKeys(unsigned char key, int xx, int yy) {
 	float deltaToMove = 0.5;
@@ -578,6 +600,20 @@ void processKeys(unsigned char key, int xx, int yy) {
 			laZ += deltaToMove*r[2];
 			break;
 
+		case 'e':
+			auxDist += deltaToZoom;
+			camX = auxDist*cos(auxBeta)*sin(auxAlpha);
+			camY = auxDist*sin(auxBeta);
+			camZ = auxDist*cos(auxBeta)*cos(auxAlpha);
+			break;
+
+		case 'q':
+			auxDist -= deltaToZoom;
+			camX = auxDist*cos(auxBeta)*sin(auxAlpha);
+			camY = auxDist*sin(auxBeta);
+			camZ = auxDist*cos(auxBeta)*cos(auxAlpha);
+			break;
+		
 		case 'f':
 			glPolygonMode(GL_FRONT, GL_FILL);
 			break;
@@ -596,9 +632,6 @@ void processKeys(unsigned char key, int xx, int yy) {
 
 	glutPostRedisplay();
 }
-
-
-float auxBeta = beta, auxAlpha = alpha;
 
 void processSpecialKeys(int key, int xx, int yy) {
 	float deltaToMove = 1;
@@ -627,9 +660,9 @@ void processSpecialKeys(int key, int xx, int yy) {
 			break;
 		}
 
-		camX = dist*cos(auxBeta)*sin(auxAlpha);
-		camY = dist*sin(auxBeta);
-		camZ = dist*cos(auxBeta)*cos(auxAlpha);
+		camX = auxDist*cos(auxBeta)*sin(auxAlpha);
+		camY = auxDist*sin(auxBeta);
+		camZ = auxDist*cos(auxBeta)*cos(auxAlpha);
 }
 
 int main(int argc, char **argv) {
