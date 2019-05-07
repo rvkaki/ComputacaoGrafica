@@ -618,6 +618,7 @@ void drawBezier(char *patch_file, int tessellation) {
 	}
 
 	// VER NORMAIS
+	// estou a saltar as duas primeiras
 	for(int i = 3; i < indexes.size(); i += 3) {
 		CP c1 = vertices.at(indexes.at(i-3));
 		CP c2 = vertices.at(indexes.at(i-2));

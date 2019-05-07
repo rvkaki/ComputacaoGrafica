@@ -19,7 +19,7 @@ int total = 0;
 
 GLdouble dist = 100, beta = M_PI_4, alpha = M_PI_4, xd = 0, zd = 0;
 
-float accelerator = 1;
+float accelerator = 10;
 
 typedef std::tuple<float, float, float> vertice;
 typedef std::tuple<float, float> v_2d;
@@ -325,20 +325,32 @@ void addGroup(XMLElement *group, Group *parent) {
 			
 
 				// COLOR !! ultimo elemento: 0 -> diffuse, 1 -> specular, 2 -> emissive, 3 -> ambient
-				if(model -> FloatAttribute("diffR")) {
+				if(model -> FloatAttribute("diffR") || model -> FloatAttribute("diffG") || model -> FloatAttribute("diffB")) {
 					transformation t (std::make_tuple('C', model -> FloatAttribute("diffR"), model -> FloatAttribute("diffG"), model -> FloatAttribute("diffB"), 0));
 					curG.trans.push_back(t);
+				} else {
+					transformation t (std::make_tuple('C', 0.0, 0.0, 0.0, 0));
+					curG.trans.push_back(t);
 				}
-				if(model -> FloatAttribute("specR")) {
+				if(model -> FloatAttribute("specR") || model -> FloatAttribute("specG") || model -> FloatAttribute("specB")) {
 					transformation t (std::make_tuple('C', model -> FloatAttribute("specR"), model -> FloatAttribute("specG"), model -> FloatAttribute("specB"), 1));
 					curG.trans.push_back(t);
-				}
-				if(model -> FloatAttribute("emiR")) {
-					transformation t (std::make_tuple('C', model -> FloatAttribute("emiR"), model -> FloatAttribute("emiG"), model -> FloatAttribute("emiB"), 2));
+				} else {
+					transformation t (std::make_tuple('C', 0.5, 0.5, 0.5, 1));
 					curG.trans.push_back(t);
 				}
-				if(model -> FloatAttribute("ambR")) {
+				if(model -> FloatAttribute("emiR") || model -> FloatAttribute("emiG") || model -> FloatAttribute("emiB")) {
+					transformation t (std::make_tuple('C', model -> FloatAttribute("emiR"), model -> FloatAttribute("emiG"), model -> FloatAttribute("emiB"), 2));
+					curG.trans.push_back(t);
+				} else {
+					transformation t (std::make_tuple('C', 0.0, 0.0, 0.0, 2));
+					curG.trans.push_back(t);
+				}
+				if(model -> FloatAttribute("ambR") || model -> FloatAttribute("ambG") || model -> FloatAttribute("ambB")) {
 					transformation t (std::make_tuple('C', model -> FloatAttribute("ambR"), model -> FloatAttribute("ambG"), model -> FloatAttribute("ambB"), 3));
+					curG.trans.push_back(t);
+				} else {
+					transformation t (std::make_tuple('C', 0.5, 0.5, 0.5, 3));
 					curG.trans.push_back(t);
 				}
 			}
@@ -516,17 +528,16 @@ void renderScene() {
 	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
 	// set the camera
 	glLoadIdentity();
 	gluLookAt(camX, camY, camZ,
-		laX, laY, laZ,
+		0.0, 0.0, 0.0,
 		0.0f, 1.0f, 0.0f);
 
 	for(int i = 0; i < numLights; i++) {
+		printf("%d\n", GL_LIGHT0 + i);
 		glLightfv(GL_LIGHT0 + i, GL_POSITION, luzes.at(i));
 	}
-
 	drawVertices();
 
 	// End of frame
@@ -535,13 +546,13 @@ void renderScene() {
 
 void processKeys(unsigned char key, int xx, int yy) {
 	float deltaToMove = 0.5;
-	float deltaToZoom = 0.2;
+	float deltaToZoom = 0.5;
 	float d[3] = {laX - camX, 0, laZ - camZ};
 	float r[3], up[3] = {0.0, 1.0, 0.0};
 	normalize(d);
 	float dx, dz;
 	dx = d[0]; 
-	dz = d[2]; 
+	dz = d[2];
 	switch(key) {
 		case 'w':
 			camX += deltaToMove*d[0];
@@ -573,12 +584,12 @@ void processKeys(unsigned char key, int xx, int yy) {
 			laZ += deltaToMove*r[2];
 			break;
 
-		case GLUT_KEY_PAGE_UP:
+		case 'e':
 			camX += deltaToZoom*d[0];
 			camZ += deltaToZoom*d[2];
 			break;
 
-		case GLUT_KEY_PAGE_DOWN:
+		case 'q':
 			camX -= deltaToZoom*d[0];
 			camZ -= deltaToZoom*d[2];
 			break;
@@ -598,96 +609,9 @@ void processKeys(unsigned char key, int xx, int yy) {
 		default:
 			break;
 	}
+
+	glutPostRedisplay();
 }
-
-/*
-void processKeys(unsigned char c, int xx, int yy) {
-	// put code to process regular keys in here
-	float deltaToZoom = 0.5;
-	float deltaToMove = 0.1;
-	float r[3], d[3] = {laX - pX, pY, laY - pY}, up[3] = {0.0, 1.0, 0.0};
-	switch (c) {
-		case 'w':
-			pX += deltaToMove*d[0];
-			pZ += deltaToMove*d[2];
-			laX += deltaToMove*d[0];
-			laZ += deltaToMove*d[2];
-			break;
-
-		case 'a':
-			cross(up, d, r);
-			pX += deltaToMove*r[0];
-			pZ += deltaToMove*r[2];
-			laX += deltaToMove*r[0];
-			laZ += deltaToMove*r[2];
-			break;
-
-		case 's':
-			pX -= deltaToMove*d[0];
-			pZ -= deltaToMove*d[2];
-			laX -= deltaToMove*d[0];
-			laZ -= deltaToMove*d[2];
-			break;
-
-		case 'd':
-			cross(d, up, r);
-			pX += deltaToMove*r[0];
-			pZ += deltaToMove*r[2];
-			laX += deltaToMove*r[0];
-			laZ += deltaToMove*r[2];
-			break;
-
-		case 'u':
-			laX += deltaToMove*d[0];
-			laZ += deltaToMove*d[2];
-			break;
-
-		case 'h':
-			cross(up, d, r);
-			laX += deltaToMove*r[0];
-			laZ += deltaToMove*r[2];
-			break;
-
-		case 'j':
-			laX -= deltaToMove*d[0];
-			laZ -= deltaToMove*d[2];
-			break;
-
-		case 'k':
-			cross(d, up, r);
-			laX += deltaToMove*r[0];
-			laZ += deltaToMove*r[2];
-			break;
-
-		case 'q':
-			pX += deltaToZoom;
-			pZ += deltaToZoom;
-			break;
-
-		case 'e':
-			pX -= deltaToZoom;
-			pZ -= deltaToZoom;
-			break;
-
-		case 'f':
-			glPolygonMode(GL_FRONT, GL_FILL);
-			break;
-
-		case 'l':
-			glPolygonMode(GL_FRONT, GL_LINE);
-			break;
-
-		case 'p':
-			glPolygonMode(GL_FRONT, GL_POINT);
-			break;
-
-
-		default:
-			return;
-	}
-
-}
-*/
 
 int startX, startY, tracking = 0;
 float r = 50;
@@ -814,7 +738,6 @@ int main(int argc, char **argv) {
 		float diff[4] = {1, 1, 1, 1};
 		light = lights -> FirstChildElement("light");
 		for(; light != nullptr; light = light -> NextSiblingElement("light")) {
-		
 			glEnable(GL_LIGHT0 + numLights);
 			glLightfv(GL_LIGHT0 + numLights, GL_AMBIENT, amb);
 			glLightfv(GL_LIGHT0 + numLights, GL_DIFFUSE, diff);
