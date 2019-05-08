@@ -112,5 +112,21 @@
                 <model file="../../sphere.3d" texture="../../Texturas/2k_neptune.jpg"/>
             </models>
         </group>
+
+        <group>
+            <scale X="250" Y="250" Z="250" />
+            <models>
+                <model file="../../skybox.3d" texture="../../Texturas/8k_stars.jpg" emiR="1.0" emiG="1.0" emiB="1.0"/>
+            </models>
+        </group>
+
+        <group>
+            <translate Z="-124"/>
+            <rotate A="90" X="0" Y="0" Z="1"/>
+            <rotate A="90" X="1" Y="0" Z="0"/>
+            <models>
+                <model file="../../plane.3d" texture="../../Texturas/2k_stars_milky_way.jpg" emiR="1.0" emiG="1.0" emiB="1.0"/>
+            </models>
+        </group>
         
 </scene>

@@ -114,6 +114,175 @@ void drawPlane(float x, float z) {
 	drawPoints2D(texturas);
 }
 
+void drawSkyBox(float x, float y, float z, int div = 1){
+	std::vector<p_2d> texturas;
+	
+	float xOff = x /div;
+	float zOff = z /div;
+	float yOff = y /div;
+	float x1 = -x /2;
+	float y1 = -y /2;
+	float z1 = -z /2;
+	float x2 = x1;
+	float y2 = y1;
+	float z2 = z1;
+	float nx = 1, ny = 1, nz = 1, nx2 = 0, ny2 = 0, nz2 = 0;
+	float nxOff = 1.0 / div, nyOff = 1.0 / div, nzOff = 1.0 / div;
+
+	for(float j = 0; j < div; j ++){
+		x1 = -x /2;
+		y1 = -y /2;
+		z1 = -z /2;
+		nx = 1;
+		ny = 1;
+		nz = 1;
+		for(float i = 0; i < div; i ++){
+			//Face superior
+			drawVertex(x1, y/2, z2);
+			drawVertex(0, 1, 0);
+			texturas.push_back(make_ponto(nz2, nx));
+			drawVertex(x1+xOff, y/2, z2+zOff);
+			drawVertex(0, 1, 0);
+			texturas.push_back(make_ponto(nz2+nzOff, nx-nxOff));
+			drawVertex(x1+xOff, y/2, z2);
+			drawVertex(0, 1, 0);
+			texturas.push_back(make_ponto(nz2, nx-nxOff));
+
+			drawVertex(x1, y/2, z2);
+			drawVertex(0, 1, 0);
+			texturas.push_back(make_ponto(nz2, nx));
+			drawVertex(x1, y/2, z2+zOff);
+			drawVertex(0, 1, 0);
+			texturas.push_back(make_ponto(nz2+nzOff, nx));
+			drawVertex(x1+xOff, y/2, z2+zOff);
+			drawVertex(0, 1, 0);
+			texturas.push_back(make_ponto(nz2+nzOff, nx-nxOff));
+
+			//Face inferior
+			drawVertex(x1, -y/2, z2);
+			drawVertex(0, -1, 0);
+			texturas.push_back(make_ponto(nz2, nx));
+			drawVertex(x1 + xOff, -y / 2, z2);
+			drawVertex(0, -1, 0);
+			texturas.push_back(make_ponto(nz2, nx-nxOff));
+			drawVertex(x1 + xOff, -y / 2, z2 + zOff);
+			drawVertex(0, -1, 0);
+			texturas.push_back(make_ponto(nz2+nzOff, nx-nxOff));
+
+			drawVertex(x1, -y/2, z2);
+			drawVertex(0, -1, 0);
+			texturas.push_back(make_ponto(nz2, nx));
+			drawVertex(x1+xOff, -y/2, z2+zOff);
+			drawVertex(0, -1, 0);
+			texturas.push_back(make_ponto(nz2+nzOff, nx-nxOff));
+			drawVertex(x1, -y/2, z2+zOff);
+			drawVertex(0, -1, 0);
+			texturas.push_back(make_ponto(nz2+nzOff, nx));
+			
+			//Face Lateral 1
+			drawVertex(x1, y2, z/2);
+			drawVertex(0, 0, 1);
+			texturas.push_back(make_ponto(nx, ny2));
+			drawVertex(x1+xOff, y2+yOff, z/2);
+			drawVertex(0, 0, 1);
+			texturas.push_back(make_ponto(nx-nxOff, ny2+nyOff));
+			drawVertex(x1, y2+yOff, z/2);
+			drawVertex(0, 0, 1);
+			texturas.push_back(make_ponto(nx, ny2+nyOff));
+
+			drawVertex(x1, y2, z/2);
+			drawVertex(0, 0, 1);
+			texturas.push_back(make_ponto(nx, ny2));
+			drawVertex(x1+xOff, y2, z/2);
+			drawVertex(0, 0, 1);
+			texturas.push_back(make_ponto(nx-nxOff, ny2));
+			drawVertex(x1+xOff, y2+yOff, z/2);
+			drawVertex(0, 0, 1);
+			texturas.push_back(make_ponto(nx-nxOff, ny2+nyOff));
+
+			//Face Lateral 2
+			drawVertex(x1, y2, -z/2);
+			drawVertex(0, 0, -1);
+			texturas.push_back(make_ponto(nx, ny2));
+			drawVertex(x1, y2+yOff, -z/2);
+			drawVertex(0, 0, -1);
+			texturas.push_back(make_ponto(nx, ny2+nyOff));
+			drawVertex(x1+xOff, y2+yOff, -z/2);
+			drawVertex(0, 0, -1);
+			texturas.push_back(make_ponto(nx-nxOff, ny2+nyOff));
+
+			drawVertex(x1, y2, -z/2);
+			drawVertex(0, 0, -1);
+			texturas.push_back(make_ponto(nx, ny2));
+			drawVertex(x1+xOff, y2+yOff, -z/2);
+			drawVertex(0, 0, -1);
+			texturas.push_back(make_ponto(nx-nxOff, ny2+nyOff));
+			drawVertex(x1+xOff, y2, -z/2);
+			drawVertex(0, 0, -1);
+			texturas.push_back(make_ponto(nx-nxOff, ny2));
+
+			//Face Lateral 3
+			drawVertex(x/2, y2, z1);
+			drawVertex(1, 0, 0);
+			texturas.push_back(make_ponto(nz, ny2));
+			drawVertex(x/2, y2+yOff, z1);
+			drawVertex(1, 0, 0);
+			texturas.push_back(make_ponto(nz, ny2+nyOff));
+			drawVertex(x/2, y2+yOff, z1+zOff);
+			drawVertex(1, 0, 0);
+			texturas.push_back(make_ponto(nz-nzOff, ny2+nyOff));
+
+			drawVertex(x/2, y2, z1);
+			drawVertex(1, 0, 0);
+			texturas.push_back(make_ponto(nz, ny2));
+			drawVertex(x/2, y2+yOff, z1+zOff);
+			drawVertex(1, 0, 0);
+			texturas.push_back(make_ponto(nz-zOff, ny2+yOff));
+			drawVertex(x / 2, y2, z1 + zOff);
+			drawVertex(1, 0, 0);
+			texturas.push_back(make_ponto(nz-zOff, ny2));
+
+			//Face Lateral 4
+			drawVertex(-x/2, y2, z1);
+			drawVertex(-1, 0, 0);
+			texturas.push_back(make_ponto(nz, ny2));
+			drawVertex(-x/2, y2+yOff, z1+zOff);
+			drawVertex(-1, 0, 0);
+			texturas.push_back(make_ponto(nz-zOff, ny2+nyOff));
+			drawVertex(-x/2, y2+yOff, z1);
+			drawVertex(-1, 0, 0);
+			texturas.push_back(make_ponto(nz, ny2+nyOff));
+
+			drawVertex(-x/2, y2, z1);
+			drawVertex(-1, 0, 0);
+			texturas.push_back(make_ponto(nz, ny2));
+			drawVertex(-x/2, y2, z1+zOff);
+			drawVertex(-1, 0, 0);
+			texturas.push_back(make_ponto(nz-zOff, ny2));
+			drawVertex(-x/2, y2+yOff, z1+zOff);
+			drawVertex(-1, 0, 0);
+			texturas.push_back(make_ponto(nz-zOff, ny2+nyOff));
+
+			x1 += xOff;
+			y1 += yOff;
+			z1 += zOff;
+			nx -= xOff;
+			ny += yOff;
+			nz -= zOff;
+		}
+		x2 += xOff;
+		y2 += yOff;
+		z2 += zOff;	
+		nx2 += xOff;
+		ny2 += yOff;
+		nz2 += zOff;
+	}
+
+	f << "TEXTURA:\n";
+
+	drawPoints2D(texturas);
+}
+
 void drawBox(float x, float y, float z, int div = 1){
 	std::vector<p_2d> texturas;
 	
@@ -206,7 +375,7 @@ void drawBox(float x, float y, float z, int div = 1){
 			texturas.push_back(make_ponto(nx, ny2));
 			drawVertex(x1+xOff, y2+yOff, -z/2);
 			drawVertex(0, 0, -1);
-			texturas.push_back(make_ponto(nx+nxOff, ny2+nyOff));
+			texturas.push_back(make_ponto(nx-nxOff, ny2+nyOff));
 			drawVertex(x1, y2+yOff, -z/2);
 			drawVertex(0, 0, -1);
 			texturas.push_back(make_ponto(nx, ny2+nyOff));
@@ -216,52 +385,52 @@ void drawBox(float x, float y, float z, int div = 1){
 			texturas.push_back(make_ponto(nx, ny2));
 			drawVertex(x1+xOff, y2, -z/2);
 			drawVertex(0, 0, -1);
-			texturas.push_back(make_ponto(nx+nxOff, ny2));
+			texturas.push_back(make_ponto(nx-nxOff, ny2));
 			drawVertex(x1+xOff, y2+yOff, -z/2);
 			drawVertex(0, 0, -1);
-			texturas.push_back(make_ponto(nx+nxOff, ny2+nyOff));
+			texturas.push_back(make_ponto(nx-nxOff, ny2+nyOff));
 
 			//Face Lateral 3
 			drawVertex(x/2, y2, z1);
 			drawVertex(1, 0, 0);
-			texturas.push_back(make_ponto(ny2, nz));
+			texturas.push_back(make_ponto(nz, ny2));
 			drawVertex(x/2, y2+yOff, z1+zOff);
 			drawVertex(1, 0, 0);
-			texturas.push_back(make_ponto(ny2+nyOff, nz+nzOff));
+			texturas.push_back(make_ponto(nz-nzOff, ny2+nyOff));
 			drawVertex(x/2, y2+yOff, z1);
 			drawVertex(1, 0, 0);
-			texturas.push_back(make_ponto(ny2+nyOff, nz));
+			texturas.push_back(make_ponto(nz, ny2+nyOff));
 
 			drawVertex(x/2, y2, z1);
 			drawVertex(1, 0, 0);
-			texturas.push_back(make_ponto(ny2, nz));
+			texturas.push_back(make_ponto(nz, ny2));
 			drawVertex(x / 2, y2, z1 + zOff);
 			drawVertex(1, 0, 0);
-			texturas.push_back(make_ponto(ny2, nz+zOff));
+			texturas.push_back(make_ponto(nz-zOff, ny2));
 			drawVertex(x/2, y2+yOff, z1+zOff);
 			drawVertex(1, 0, 0);
-			texturas.push_back(make_ponto(ny2+yOff, nz+zOff));
+			texturas.push_back(make_ponto(nz-zOff, ny2+yOff));
 
 			//Face Lateral 4
 			drawVertex(-x/2, y2, z1);
 			drawVertex(-1, 0, 0);
-			texturas.push_back(make_ponto(ny2, nz));
+			texturas.push_back(make_ponto(nz, ny2));
 			drawVertex(-x/2, y2+yOff, z1);
 			drawVertex(-1, 0, 0);
-			texturas.push_back(make_ponto(ny2+nyOff, nz));
+			texturas.push_back(make_ponto(nz, ny2+nyOff));
 			drawVertex(-x/2, y2+yOff, z1+zOff);
 			drawVertex(-1, 0, 0);
-			texturas.push_back(make_ponto(ny2+nyOff, nz+zOff));
+			texturas.push_back(make_ponto(nz-zOff, ny2+nyOff));
 
 			drawVertex(-x/2, y2, z1);
 			drawVertex(-1, 0, 0);
-			texturas.push_back(make_ponto(ny2, nz));
+			texturas.push_back(make_ponto(nz, ny2));
 			drawVertex(-x/2, y2+yOff, z1+zOff);
 			drawVertex(-1, 0, 0);
-			texturas.push_back(make_ponto(ny2+nyOff, nz+zOff));
+			texturas.push_back(make_ponto(nz-zOff, ny2+nyOff));
 			drawVertex(-x/2, y2, z1+zOff);
 			drawVertex(-1, 0, 0);
-			texturas.push_back(make_ponto(ny2, nz+zOff));
+			texturas.push_back(make_ponto(nz-zOff, ny2));
 
 			x1 += xOff;
 			y1 += yOff;
@@ -685,6 +854,16 @@ int main(int argc, char **argv) {
 			drawBox(x,y,z, div);
 		} else {
 			printf("Número incorreto de argumentos\nUsage: ./generate box x y z div\n");
+			exit(EXIT_FAILURE);
+		}
+	} else if(strcmp(argv[1], "skybox") == 0) {
+		if(argc == 6) {
+			x = atoi(argv[2]);
+			y = atoi(argv[3]);
+			z = atoi(argv[4]);
+			drawSkyBox(x,y,z);
+		} else {
+			printf("Número incorreto de argumentos\nUsage: ./generate skybox x y z\n");
 			exit(EXIT_FAILURE);
 		}
 	} else if(strcmp(argv[1], "cone") == 0) { 

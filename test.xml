@@ -1,0 +1,10 @@
+<scene>
+        <group>
+            <translate Z="-125"/>
+            <rotate A="90" X="1" Y="0" Z="0"/>
+            <models>
+                <model file="../../plane.3d" texture="../../Texturas/2k_stars_milky_way.jpg" emiR="1.0" emiG="1.0" emiB="1.0"/>
+            </models>
+        </group>
+        
+</scene>

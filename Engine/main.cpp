@@ -537,7 +537,6 @@ void drawAxis() {
 
 float camX = dist*cos(beta)*sin(alpha), camY = dist*sin(beta), camZ = dist*cos(beta)*cos(alpha);
 float laX = 0.0, laY = 0.0, laZ = 0.0;
-float r = dist;
 
 void renderScene() {
 	// clear buffers
@@ -598,16 +597,6 @@ void processKeys(unsigned char key, int xx, int yy) {
 			camZ += deltaToMove*r[2];
 			laX += deltaToMove*r[0];
 			laZ += deltaToMove*r[2];
-			break;
-
-		case 'e':
-			camY += deltaToMove*up[1];
-			laY += deltaToMove*up[1];
-			break;
-
-		case 'q':
-			camY -= deltaToMove*up[1];
-			laY -= deltaToMove*up[1];
 			break;
 		
 		case 'f':
