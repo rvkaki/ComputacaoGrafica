@@ -307,128 +307,128 @@ void drawBox(float x, float y, float z, int div = 1){
 		nz = 1;
 		for(float i = 0; i < div; i ++){
 			//Face superior
-			drawVertex(x1, y/2, z2);
+			drawVertex(-x1, y/2, z2);
 			drawVertex(0, 1, 0);
 			texturas.push_back(make_ponto(nz2, nx));
-			drawVertex(x1+xOff, y/2, z2);
+			drawVertex(-x1-xOff, y/2, z2);
 			drawVertex(0, 1, 0);
 			texturas.push_back(make_ponto(nz2, nx-nxOff));
-			drawVertex(x1+xOff, y/2, z2+zOff);
+			drawVertex(-x1-xOff, y/2, z2+zOff);
 			drawVertex(0, 1, 0);
 			texturas.push_back(make_ponto(nz2+nzOff, nx-nxOff));
 
-			drawVertex(x1, y/2, z2);
+			drawVertex(-x1, y/2, z2);
 			drawVertex(0, 1, 0);
 			texturas.push_back(make_ponto(nz2, nx));
-			drawVertex(x1+xOff, y/2, z2+zOff);
+			drawVertex(-x1-xOff, y/2, z2+zOff);
 			drawVertex(0, 1, 0);
 			texturas.push_back(make_ponto(nz2+nzOff, nx-nxOff));
-			drawVertex(x1, y/2, z2+zOff);
+			drawVertex(-x1, y/2, z2+zOff);
 			drawVertex(0, 1, 0);
 			texturas.push_back(make_ponto(nz2+nzOff, nx));
 
 			//Face inferior
-			drawVertex(x1, -y/2, z2);
+			drawVertex(-x1, -y/2, z2);
 			drawVertex(0, -1, 0);
 			texturas.push_back(make_ponto(nz2, nx));
-			drawVertex(x1 + xOff, -y / 2, z2 + zOff);
+			drawVertex(-x1 - xOff, -y / 2, z2 + zOff);
 			drawVertex(0, -1, 0);
 			texturas.push_back(make_ponto(nz2+nzOff, nx-nxOff));
-			drawVertex(x1 + xOff, -y / 2, z2);
+			drawVertex(-x1 - xOff, -y / 2, z2);
 			drawVertex(0, -1, 0);
 			texturas.push_back(make_ponto(nz2, nx-nxOff));
 
-			drawVertex(x1, -y/2, z2);
+			drawVertex(-x1, -y/2, z2);
 			drawVertex(0, -1, 0);
 			texturas.push_back(make_ponto(nz2, nx));
-			drawVertex(x1, -y/2, z2+zOff);
+			drawVertex(-x1, -y/2, z2+zOff);
 			drawVertex(0, -1, 0);
 			texturas.push_back(make_ponto(nz2+nzOff, nx));
-			drawVertex(x1+xOff, -y/2, z2+zOff);
+			drawVertex(-x1-xOff, -y/2, z2+zOff);
 			drawVertex(0, -1, 0);
 			texturas.push_back(make_ponto(nz2+nzOff, nx-nxOff));
 			
 			//Face Lateral 1
-			drawVertex(x1, y2, z/2);
+			drawVertex(-x1, y2, z/2);
 			drawVertex(0, 0, 1);
 			texturas.push_back(make_ponto(nx, ny2));
-			drawVertex(x1, y2+yOff, z/2);
+			drawVertex(-x1, y2+yOff, z/2);
 			drawVertex(0, 0, 1);
 			texturas.push_back(make_ponto(nx, ny2+nyOff));
-			drawVertex(x1+xOff, y2+yOff, z/2);
+			drawVertex(-x1-xOff, y2+yOff, z/2);
 			drawVertex(0, 0, 1);
 			texturas.push_back(make_ponto(nx-nxOff, ny2+nyOff));
 
-			drawVertex(x1, y2, z/2);
+			drawVertex(-x1, y2, z/2);
 			drawVertex(0, 0, 1);
 			texturas.push_back(make_ponto(nx, ny2));
-			drawVertex(x1+xOff, y2+yOff, z/2);
+			drawVertex(-x1-xOff, y2+yOff, z/2);
 			drawVertex(0, 0, 1);
 			texturas.push_back(make_ponto(nx-nxOff, ny2+nyOff));
-			drawVertex(x1+xOff, y2, z/2);
+			drawVertex(-x1-xOff, y2, z/2);
 			drawVertex(0, 0, 1);
 			texturas.push_back(make_ponto(nx-nxOff, ny2));
 
 			//Face Lateral 2
-			drawVertex(x1, y2, -z/2);
+			drawVertex(-x1, y2, -z/2);
 			drawVertex(0, 0, -1);
 			texturas.push_back(make_ponto(nx, ny2));
-			drawVertex(x1+xOff, y2+yOff, -z/2);
+			drawVertex(-x1-xOff, y2+yOff, -z/2);
 			drawVertex(0, 0, -1);
 			texturas.push_back(make_ponto(nx-nxOff, ny2+nyOff));
-			drawVertex(x1, y2+yOff, -z/2);
+			drawVertex(-x1, y2+yOff, -z/2);
 			drawVertex(0, 0, -1);
 			texturas.push_back(make_ponto(nx, ny2+nyOff));
 
-			drawVertex(x1, y2, -z/2);
+			drawVertex(-x1, y2, -z/2);
 			drawVertex(0, 0, -1);
 			texturas.push_back(make_ponto(nx, ny2));
-			drawVertex(x1+xOff, y2, -z/2);
+			drawVertex(-x1-xOff, y2, -z/2);
 			drawVertex(0, 0, -1);
 			texturas.push_back(make_ponto(nx-nxOff, ny2));
-			drawVertex(x1+xOff, y2+yOff, -z/2);
+			drawVertex(-x1-xOff, y2+yOff, -z/2);
 			drawVertex(0, 0, -1);
 			texturas.push_back(make_ponto(nx-nxOff, ny2+nyOff));
 
 			//Face Lateral 3
-			drawVertex(x/2, y2, z1);
+			drawVertex(-x/2, y2, z1);
 			drawVertex(1, 0, 0);
 			texturas.push_back(make_ponto(nz, ny2));
-			drawVertex(x/2, y2+yOff, z1+zOff);
+			drawVertex(-x/2, y2+yOff, z1+zOff);
 			drawVertex(1, 0, 0);
 			texturas.push_back(make_ponto(nz-nzOff, ny2+nyOff));
-			drawVertex(x/2, y2+yOff, z1);
+			drawVertex(-x/2, y2+yOff, z1);
 			drawVertex(1, 0, 0);
 			texturas.push_back(make_ponto(nz, ny2+nyOff));
 
-			drawVertex(x/2, y2, z1);
+			drawVertex(-x/2, y2, z1);
 			drawVertex(1, 0, 0);
 			texturas.push_back(make_ponto(nz, ny2));
-			drawVertex(x / 2, y2, z1 + zOff);
+			drawVertex(-x / 2, y2, z1 + zOff);
 			drawVertex(1, 0, 0);
 			texturas.push_back(make_ponto(nz-zOff, ny2));
-			drawVertex(x/2, y2+yOff, z1+zOff);
+			drawVertex(-x/2, y2+yOff, z1+zOff);
 			drawVertex(1, 0, 0);
 			texturas.push_back(make_ponto(nz-zOff, ny2+yOff));
 
 			//Face Lateral 4
-			drawVertex(-x/2, y2, z1);
+			drawVertex(x/2, y2, z1);
 			drawVertex(-1, 0, 0);
 			texturas.push_back(make_ponto(nz, ny2));
-			drawVertex(-x/2, y2+yOff, z1);
+			drawVertex(x/2, y2+yOff, z1);
 			drawVertex(-1, 0, 0);
 			texturas.push_back(make_ponto(nz, ny2+nyOff));
-			drawVertex(-x/2, y2+yOff, z1+zOff);
+			drawVertex(x/2, y2+yOff, z1+zOff);
 			drawVertex(-1, 0, 0);
 			texturas.push_back(make_ponto(nz-zOff, ny2+nyOff));
 
-			drawVertex(-x/2, y2, z1);
+			drawVertex(x/2, y2, z1);
 			drawVertex(-1, 0, 0);
 			texturas.push_back(make_ponto(nz, ny2));
-			drawVertex(-x/2, y2+yOff, z1+zOff);
+			drawVertex(x/2, y2+yOff, z1+zOff);
 			drawVertex(-1, 0, 0);
 			texturas.push_back(make_ponto(nz-zOff, ny2+nyOff));
-			drawVertex(-x/2, y2, z1+zOff);
+			drawVertex(x/2, y2, z1+zOff);
 			drawVertex(-1, 0, 0);
 			texturas.push_back(make_ponto(nz-zOff, ny2));
 

@@ -412,7 +412,7 @@ void drawGroup(Group g) {
 	for(transformation tr: g.trans) {
 		switch(std::get<0>(tr)) {
 			case 'T':
-				glTranslatef(std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
+				glTranslatef(-std::get<1>(tr), std::get<2>(tr), std::get<3>(tr));
 				break;
 
 			case 'I':
@@ -423,7 +423,7 @@ void drawGroup(Group g) {
 				y = std::get<3>(tr);
 				z = std::get<4>(tr);
 				rots++;		
-				glRotatef(a, x, y, z);
+				glRotatef(-a, x, y, z);
 				}
 				break;
 
@@ -484,7 +484,7 @@ void drawGroup(Group g) {
     drawVBOs(g.models);
 
 	if(rots >= 2) {
-		glRotatef(-a, x, y, z);
+		glRotatef(a, x, y, z);
 	}
 
 	for(Group sg: g.subGroups) {
@@ -535,7 +535,7 @@ void drawAxis() {
 	glEnd();
 }
 
-float camX = dist*cos(beta)*sin(alpha), camY = dist*sin(beta), camZ = dist*cos(beta)*cos(alpha);
+float camX = dist*cos(beta)*sin(alpha), camY = dist*sin(beta), camZ = -dist*cos(beta)*cos(alpha);
 float laX = 0.0, laY = 0.0, laZ = 0.0;
 
 void renderScene() {
@@ -547,14 +547,13 @@ void renderScene() {
 	gluLookAt(camX, camY, camZ,
 		laX, laY, laZ,
 		0.0f, 1.0f, 0.0f);
-
+	glScalef(1, 1, -1);
 	for(int i = 0; i < numLights; i++) {
 		glLightfv(GL_LIGHT0 + i, GL_POSITION, luzes.at(i));
 	}
-
 	//drawAxis();
-
 	drawVertices();
+
 
 	// End of frame
 	glutSwapBuffers();
@@ -599,6 +598,16 @@ void processKeys(unsigned char key, int xx, int yy) {
 			laZ += deltaToMove*r[2];
 			break;
 		
+		case 'q':
+			camY += deltaToMove;
+			laY += deltaToMove;
+			break;
+
+		case 'e':
+			camY -= deltaToMove;
+			laY -= deltaToMove;
+			break;
+
 		case 'f':
 			glPolygonMode(GL_FRONT, GL_FILL);
 			break;
@@ -622,11 +631,11 @@ void processSpecialKeys(int key, int xx, int yy) {
 
 	switch (key) {
 		case GLUT_KEY_RIGHT:
-			auxAlpha -= 0.1;
+			auxAlpha += 0.1;
 			break;
 
 		case GLUT_KEY_LEFT:
-			auxAlpha += 0.1;
+			auxAlpha -= 0.1;
 			break;
 
 		case GLUT_KEY_UP:
@@ -642,7 +651,7 @@ void processSpecialKeys(int key, int xx, int yy) {
 			break;
 		}
 
-		laX = dist*cos(auxBeta)*sin(auxAlpha);
+		laX = -dist*cos(auxBeta)*sin(auxAlpha);
 		laY = dist*sin(auxBeta);
 		laZ = dist*cos(auxBeta)*cos(auxAlpha);
 }
@@ -721,7 +730,7 @@ int main(int argc, char **argv) {
 			if(strcmp(tipo, "DIRECTIONAL") == 0)
 				t = 0;
 
-			float pos[4] = {X, Y, Z, t};
+			float pos[4] = {-X, Y, Z, t};
 
 			luzes.push_back(pos);
 
